@@ -1,0 +1,59 @@
+
+@charset "UTF-8";
+
+.top-page { /* トップページのルートフォーム */
+    
+}
+
+.top-page #body-section > div.logo > p {
+    font-size: 2.8vh;
+}
+
+.menu-page #body-section > div.menu > div.command > div.name {
+    white-space: normal;
+    line-height: 5vh;
+    padding: 1vh 1vh;
+}
+
+
+.menu-page { /* 追加注文ページのルートフォーム */
+    
+}
+
+.main-page { /* 注文かごページのルートフォーム */
+    
+}
+
+.order-page { /* 注文送信後ページのルートフォーム */
+    
+}
+
+.history-page { /* 注文履歴ページのルートフォーム */
+    
+}
+
+.call-page { /* 店員呼出ページのルートフォーム */
+    
+}
+
+.account-page { /* お会計をするページのルートフォーム */
+
+}
+
+
+.receipt-page #body-section > div.btn {
+    width: 30vh;
+    line-height: 4vh;
+    margin: 17vh auto 0 auto;
+    font-size: 2.5vh;
+}
+
+.receipt-page #body-section > p.comment {
+    font-size: 3.4vh;
+    margin: 0 0 2vh 0;
+}
+
+.receipt-page #body-section > p.comment2 {
+    font-size: 2.2vh;
+    margin: 3vh 0 0 0;
+}

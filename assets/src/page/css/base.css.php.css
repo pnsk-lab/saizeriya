@@ -1,0 +1,749 @@
+
+@charset "UTF-8";
+
+@page {
+    size: A4;
+	margin: 0mm 0mm;
+}
+@-ms-viewport {
+    width: device-width;
+}
+@viewport {
+    width: device-width;
+}
+
+:root {
+    color-scheme: light!important;
+}
+
+dl,
+dt,
+dd,
+dl dt,
+dl dd,
+ul,
+ul li ul,
+ul li ol,
+ol,
+ol li ul,
+ol li ol,
+table,
+form {
+    margin: 0;
+}
+
+/* ローディングイメージ */
+img.loading {
+    background-color: white;
+    background-image: url(../img/loading.gif);
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+}
+
+::-webkit-scrollbar{height:2vw;width:2vw}/*バーの太さ*/
+::-webkit-scrollbar-track{background:transparent;border:none;}/*バーの背景色*/
+::-webkit-scrollbar-thumb{background:#dfdfdf;border-radius:2vw;box-shadow: inset 0 0 1.5vw rgba(64,64,64,1.0);}/*バーの色*/
+
+.off-canvas-wrap {
+    overflow-x: auto;
+}
+
+.fixed {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+/* 多言語対応文字詰め設定 */
+.align-justify,
+.ui-dialog .ui-dialog-content {
+    text-align: justify;
+}
+
+/* 強制非表示クラス */
+.phantom {
+    display: none !important;
+}
+
+body,dt,dd,li,h1, h2, h3, h4, h5, h6, div, a, p, button {
+    font-family: 'Roboto', 'Noto Sans JP', "游ゴシック体", YuGothic, "游ゴシック", "Yu Gothic"!important;    font-feature-settings: "palt";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-transform: none !important;
+}
+.font-double-space {
+    letter-spacing: 1em;
+    margin-right: -1em!important;
+}
+.font-half-space {
+    letter-spacing: 0.5em;
+    margin-right: -0.5em!important;
+}
+.font-single-space {
+    letter-spacing: 0;
+    margin-right: 0!important;
+}
+
+/* 基本的なBODY設定 */
+body {
+    background-color: white;
+    color: #333;
+    font-size: 4.2vw;
+    line-height: 140%;
+    touch-action: manipulation;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+.off-canvas-wrap {
+/*    opacity: 0;*/
+   background-color: transparent!important;
+}
+.inner-wrap {
+   background-color: transparent!important;
+}
+.showtime {
+    opacity: 100!important;
+    -webkit-transition: 1.5s;
+    -moz-transition: 1.5s;
+    -o-transition: 1.5s;
+    -ms-transition: 1.5s;
+    transition: 1.5s;
+}
+
+/* ヘッダー */
+#header {
+    display: block;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 6vh;
+    background-color: #219228;
+    z-index: 9999;
+}
+#header > h1 {
+    display: block;
+    width: 100vw;
+    height: 6vh;
+    padding: 0;
+    margin: 0;
+    font-size: 2.7vh;
+    line-height: 6vh;
+    font-weight: 600;
+    text-align: center;
+    vertical-align: middle;
+    color: white;
+    white-space: nowrap;
+}
+
+#body-section {
+    display: block;
+    position: fixed;
+    left: 0;
+    top: 6vh;
+    width: 100vw;
+    height: 81vh;
+    padding: 1.5vh;
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#footer {
+    display: block;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100vw;
+    height: auto;
+    background-color: #219228!important;
+    color: white!important;
+}
+#footer > p {
+    display: block;
+    width: 100%;
+    height: 4vh;
+    padding: 0;
+    margin: 0;
+    color: white!important;
+    font-size: 1.8vh;
+    line-height: 4vh;
+    text-align: center;
+}
+#menu {
+    list-style: none;
+    width: 100vw;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    font-size: 0;
+    line-height: 0;
+    text-align: center;
+}
+#menu > li {
+    display: inline-block;
+    width: 18.5vw;
+    height: 9vh;
+    padding: 0;
+    margin: 1vh 0.5vw 1vh 0.5vw;
+    font-size: 0;
+    line-height: 9vh;
+    font-weight: 400;
+    border: solid 0.4vh #219228;
+    border-radius: 1vh;
+    background: white;
+    box-shadow: inset 0 -1vw 3vw 1vw rgb(0 0 0 / 25%);
+    cursor: pointer;
+    position: relative;
+}
+#menu > li.disabled {
+    cursor: default;
+}
+/*#menu.no-call > li#after-call {
+    display: none;
+}
+#menu.no-call > li {
+    width: 23.5vw;
+}*/
+#menu > li > p {
+    position: absolute;
+    display: inline-block;
+    width: max-content;
+    height: auto;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    -webkit- transform: translateY(-50%) translateX(-50%);
+    padding: 0;
+    margin: 0;
+    font-size: 3.2vh;
+    line-height: 110%;
+    font-weight: 800;
+    color: #219228;
+    white-space: nowrap;
+}
+#menu > li.disabled > p {
+    color: #999;
+}
+#menu > li.selected {
+    border: solid 0.4vh #ff9900;
+}
+#menu > li.selected > p {
+    color: #219228;
+}
+/*#menu > li#order-list.disabled > .count {
+    display: none;
+}
+#menu > li#order-list:not(.disabled) > .count {
+    position: absolute;
+    display: block;
+    width: 4vh;
+    height: 4vh;
+    top: -0.75vh;
+    right: -1.50vh;
+    padding: 0;
+    margin: 0;
+    font-size: 3.0vh;
+    line-height: 4.3vh;
+    font-weight: 900;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 50%;
+    color: white;
+    background: red;
+    z-index: 99999;
+}*/
+#menu > li#order-list > .count,
+#menu > li#after-call > .after,
+#menu > li#do-account > .find {
+    position: absolute;
+    display: block;
+    width: 4vh;
+    height: 4vh;
+    top: -0.75vh;
+    right: -1.50vh;
+    padding: 0;
+    margin: 0;
+    font-size: 3.0vh;
+    line-height: 4.3vh;
+    font-weight: 900;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 50%;
+    color: white;
+    background: red;
+    z-index: 99999;
+}
+#menu > li#do-account > .find {
+    background: darkorange;
+}
+/*#menu > li#after-call > .after {
+    position: absolute;
+    display: block;
+    width: 2.5vh;
+    height: 2.5vh;
+    top: -0.75vh;
+    left: -1.00vh;
+    padding: 0;
+    margin: 0;
+    font-size: 0vh;
+    line-height: 0vh;
+    font-weight: 900;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 50%;
+    color: white;
+    background: red;
+    z-index: 99999;
+}*/
+
+body.start #menu {
+    display: none;
+}
+body:not(.start) #copy {
+    display: none;
+}
+
+/* ページトップへ */
+#pagetop {
+    position: fixed;
+    z-index: 32766;
+    bottom: 2vw;
+    right: 2vw;
+    display: none
+}
+#pagetop > div {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    text-shadow: none;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    outline: none;
+    cursor: pointer;
+    opacity: .9!important;
+}
+#pagetop > div:hover {
+    text-shadow: none;
+    opacity: .9!important;
+}
+#pagetop > div > div {
+    width: 12vw;
+    height: 12vw;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    background-color: #666!important;
+}
+#pagetop > div > div > div {
+    position: relative;
+    width: 6.0vw;
+    height: 6.0vw;
+    left: 3.0vw;
+    top: 4.2vw;
+    border-left: solid 1.4vw #fff;
+    border-top: solid 1.4vw #fff;
+    transform: rotate(45deg);
+}
+
+/* ボタン色 */
+.btn.green {
+    border: solid 2px rgba(10,165,70,1);
+    color: white;
+    background: rgb(10,165,70);
+    background: linear-gradient(0deg, rgba(10,165,70,1) 0%, rgba(10,165,70,1) 50%, rgba(100,255,160,1) 100%);
+}
+.btn.red {
+    border: solid 2px rgb(204,0,0);
+    color: white;
+    background: rgb(204,0,0);
+    background: linear-gradient(0deg, rgba(204,0,0,1) 0%, rgba(204,0,0,1) 50%, rgba(255,165,165,1) 100%);
+}
+.btn.blue {
+    border: solid 2px rgba(0,51,255,1);
+    color: white;
+    background: rgb(0,51,255);
+    background: linear-gradient(0deg, rgba(0,51,255,1) 0%, rgba(0,51,255,1) 50%, rgba(0,170,255,1) 100%);
+}
+.btn.orange {
+    border: solid 2px rgba(255,153,0,1);
+    color: white;
+    background: rgb(255,153,0);
+    background: linear-gradient(0deg, rgba(255,153,0,1) 0%, rgba(255,153,0,1) 50%, rgba(255,221,153,1) 100%);
+}
+.btn.white {
+    border: solid 2px rgba(102,102,102,1);
+    color: rgba(10,165,70,1);
+    background: white;
+    background: linear-gradient(0deg, rgba(224,224,224,1) 0%, rgba(249,249,249,1) 50%, white 100%);
+}
+.btn.gray {
+    border: solid 2px rgba(102,102,102,1);
+    color: white;
+    background: rgba(102,102,102,1);
+    background: linear-gradient(0deg, rgba(102,102,102,1) 0%, rgba(102,102,102,1) 50%, rgba(170,170,170,1) 100%);
+}
+.btn.text {
+    border: solid 2px rgba(10,165,70,1);
+    color: rgba(10,165,70,1);
+    background: white;
+    background: linear-gradient(0deg, rgba(224,224,224,1) 0%, rgba(249,249,249,1) 50%, white 100%);
+}
+.btn.disabled {
+    border: solid 2px rgba(102,102,102,1);
+    color: #eee;
+    background: rgba(170,170,170,1);
+    background: linear-gradient(0deg, rgba(170,170,170,1) 0%, rgba(170,170,170,1) 50%, rgba(224,224,224,1) 100%);
+    cursor: auto!important;
+}
+
+/* 点滅クラス */
+.blinking{
+	-webkit-animation:blink 0.5s ease-in-out infinite alternate;
+    -moz-animation:blink 0.5s ease-in-out infinite alternate;
+    animation:blink 0.5s ease-in-out infinite alternate;
+}
+@-webkit-keyframes blink{
+    0% {opacity:0;}
+    25% {opacity:0.5;}
+    50% {opacity:1;}
+    100% {opacity:1;}
+}
+@-moz-keyframes blink{
+    0% {opacity:0;}
+    25% {opacity:0.5;}
+    50% {opacity:1;}
+    100% {opacity:1;}
+}
+@keyframes blink{
+    0% {opacity:0;}
+    25% {opacity:0.5;}
+    50% {opacity:1;}
+    100% {opacity:1;}
+}
+
+/* 横画面用メッセージ */
+#caution-section {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: #eee;
+}
+#caution-section > p {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    -webkit- transform: translateY(-50%) translateX(-50%);
+    text-align: center;
+    font-size: 5.5vh;
+    line-height: 175%;
+    font-weight: bold;
+    color: #219228;
+    margin: 0;
+    padding: 0;
+}
+
+/* 縦横画面切替処理 */
+@media screen and (orientation: landscape) {
+    .portrait {
+        display: none;
+    }
+    .off-canvas-wrap {
+        height: 100%;
+    }
+    .landscape {
+        height: 100%;
+    }
+    .scroll-mark {
+        display: none!important;
+    }
+}
+@media screen and (orientation: portrait) {
+    .landscape {
+        display: none;
+    }
+}
+
+/* メッセージダイアログ */
+#base-overlay {
+    background: transparent!important;
+    opacity: 1!important;
+    filter: Alpha(Opacity=100)!important;
+}
+.ui-widget-overlay {
+    z-index: 9999998;
+}
+.ui-dialog {
+    padding: 0;
+    border-radius: 1vw;
+    z-index: 9999999;
+    left: 50%!important;
+    top: 50%!important;
+    transform: translateX(-50%) translateY(-50%);
+    -webkit-transform: translateX(-50%) translateY(-50%);
+    border-radius: 0.5em;
+    border: solid 1px forestgreen!important;
+    filter: drop-shadow(0.15em 0.15em 0.15em rgba(66, 66, 66, 0.6));
+}
+.ui-dialog:before {
+    content: '';
+    position: absolute;
+    display: block;
+    width: 0;
+    height: 0;
+    top: 2vh;
+    right: -0.9em;
+    border-bottom: 0.5em solid transparent;
+    border-left: 0.9em solid #219228;
+}
+.ui-dialog:after {
+    content: '';
+    position: absolute;
+    display: block;
+    width: 0;
+    height: 0;
+    top: calc(2vh + 1px);
+    right: calc(-0.9em + 3.5px);
+    border-bottom: 0.5em solid transparent;
+    border-left: 0.9em solid white;
+}
+.ui-dialog .ui-dialog-titlebar {
+    border: none;
+    border-radius: unset;
+    padding: 1vw 2vw;
+    background-image: none;
+    background: linear-gradient(#5AFF86, #219228);
+    display: none;
+}
+.ui-dialog .ui-dialog-title {
+    float: left;
+    margin: 0.3vw 0 0.3vw 0;
+    white-space: nowrap;
+    width: 70vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 4vw;
+    line-height: 5vw;
+    font-weight: bold;
+}
+.ui-dialog .ui-dialog-content {
+    padding: 6vw;
+    font-size: 6vw;
+    line-height: 150%;
+}
+.ui-dialog .ui-dialog-buttonpane {
+    border: none;
+    background-image: none;
+    margin-top: 0;
+    padding: 0 5vw 5vw 5vw;
+    background: transparent;
+}
+.ui-dialog .ui-dialog-buttonpane button {
+    margin: 0 0 0 4vw;
+    padding: 1.5vw 3vw;
+    font-size: 5.8vw;
+    line-height: 5.8vw;
+    cursor: pointer;
+}
+.ui-dialog .ui-dialog-titlebar-close {
+    position: absolute;
+    top: 50%;
+    width: 5vw;
+    margin: 0;
+    padding: 0;
+    height: 5vw;
+    transform: translateY(-50%) translateX(0);
+    -webkit- transform: translateY(-50%) translateX(0);
+}
+
+/* 吹き出し */
+.balloon{
+    position: absolute;
+    padding: 0.3em 0.6em 0.5em 0.6em;
+    color: gray;
+    line-height: 125%;
+    text-align: justify;
+    background: honeydew;
+    border-radius: 0.5em;
+    border: solid 1px forestgreen;
+    filter: drop-shadow(0.15em 0.15em 0.15em rgba(66, 66, 66, 0.6));
+    opacity: 0;
+    transform: scale(0.5);
+//    transform: matrix(1, 0, 0, 1, 0, 100);
+}
+.balloon.show{
+    opacity: 100;
+    transform: scale(1.0);
+//    transform: matrix(1, 0, 0, 1, 0, 0);
+    -webkit-transition: 0.6s;
+    -moz-transition: 0.6s;
+    -o-transition: 0.6s;
+    -ms-transition: 0.6s;
+    transition: 0.6s;
+}
+.balloon.bottom > .balloon-arrow{
+    position: absolute;
+    display: block;
+    width: 0.5em;
+    height: 0.9em;
+    bottom: calc(-0.9em - 1px);
+}
+.balloon.bottom > .balloon-arrow:before{
+    content: '';
+    position: absolute;
+    display: block;
+    width: 0;
+    height: 0;
+    top: 0;
+    left: 0;
+    border-right: 0.5em solid transparent;
+    border-top: 0.9em solid forestgreen;
+}
+.balloon.bottom > .balloon-arrow:after{
+    content: '';
+    position: absolute;
+    display: block;
+    width: 0;
+    height: 0;
+    top: -3.5px;
+    left: 1px;
+    border-right: 0.5em solid transparent;
+    border-top: 0.9em solid honeydew;
+}
+.balloon > span {
+    font-size: 80%;
+    line-height: 100%;
+    text-align: justify;
+}
+
+.notice-balloon {
+    position: absolute;
+    padding: 0.5em 1.0em 0.4em 1.0em;
+    background-color: #ffffaa;
+    color: #219228;
+    line-height: 125%;
+    text-align: justify;
+    border-radius: 0.5em;
+    border: solid 1px red;
+    filter: drop-shadow(0.15em 0.15em 0.15em rgba(66, 66, 66, 0.6));
+    opacity: 0;
+    transform: translate(0, 0);
+    max-width: 94vw;
+    top: 45%;
+    right: 3vw;
+    z-index: 9999999999999;
+    pointer-events: none;
+}
+.notice-balloon.show {
+    -moz-animation: cssAnimation 15s ease-in 0s forwards;
+    -webkit-animation: cssAnimation 15s ease-in 0s forwards;
+    -o-animation: cssAnimation 15s ease-in 0s forwards;
+    animation: cssAnimation 15s ease-in 0s forwards;
+    -webkit-animation-fill-mode: forwards;
+    animation-fill-mode: forwards;
+}
+@keyframes cssAnimation {
+    0% {
+        opacity: 0;
+        transform: translate(100%, 0);
+        pointer-events: auto;
+    }
+    4% {
+        opacity: 100;
+        transform: translate(0, 0);
+        pointer-events: auto;
+    }
+    95% {
+        opacity: 100;
+        transform: translate(0, 0);
+        pointer-events: auto;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(0, 0);
+        pointer-events: none;
+    }
+}
+@-webkit-keyframes cssAnimation {
+    0% {
+        opacity: 0;
+        transform: translate(100%, 0);
+        pointer-events: auto;
+    }
+    4% {
+        opacity: 100;
+        transform: translate(0, 0);
+        pointer-events: auto;
+    }
+    95% {
+        opacity: 100;
+        transform: translate(0, 0);
+        pointer-events: auto;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(0, 0);
+        pointer-events: none;
+    }
+}
+.notice-balloon > .balloon-arrow {
+    position: absolute;
+    display: block;
+    width: 0.9em;
+    height: 0.5em;
+    top: 0.5em;
+    right: calc(-0.9em - 1px);
+}
+.notice-balloon > .balloon-arrow:before {
+    content: '';
+    position: absolute;
+    display: block;
+    width: 0;
+    height: 0;
+    top: 0;
+    left: 0;
+    border-bottom: 0.5em solid transparent;
+    border-left: 0.9em solid red;
+}
+.notice-balloon > .balloon-arrow:after {
+    content: '';
+    position: absolute;
+    display: block;
+    width: 0;
+    height: 0;
+    top: 1px;
+    left: -3.5px;
+    border-bottom: 0.5em solid transparent;
+    border-left: 0.9em solid #ffffaa;
+}
+.notice-balloon > span {
+    font-size: 6vw;
+    line-height: 150%;
+    text-align: justify;
+}
+.notice-balloon .ui-dialog-buttonset {
+    margin: 0.3rem 0 0.3rem 0;
+    text-align: right;
+}
+.notice-balloon .ui-dialog-buttonset button {
+    margin: 0 0 0 4vw;
+    padding: 1.5vw 3vw 0.8vw 3vw;
+    font-size: 5.8vw;
+    line-height: 5.8vw;
+    cursor: pointer;
+}
+
+/* フロート対応 */
+.float-clear::after {
+    content:"";
+    display:table;
+    clear:both;
+}
+a:focus {
+    color: #333;
+	outline: none;
+}

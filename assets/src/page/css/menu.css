@@ -1,0 +1,598 @@
+
+@charset "UTF-8";
+
+@-ms-viewport {
+    width: device-width;
+}
+
+#body-section {
+    
+}
+
+.ui-dialog .ui-dialog-content .title {
+    font-size: 4.6vw;
+    line-height: 150%;
+    font-weight: 700;
+    color: #219228;
+    padding: 0;
+    margin: 0 0 3vw 0;
+}
+.ui-dialog .ui-dialog-content .message {
+    padding: 0;
+    margin: 0;
+    font-size: 4.5vw;
+    line-height: 150%;
+}
+
+#body-section > div.menu,
+#body-section > div.detail {
+    position: absolute;
+    width: 100%;
+    height: auto;
+    max-height: 65vh;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    -webkit- transform: translateY(-50%);
+    padding: 1.5vh 2vw;
+    margin: 0;
+}
+
+#body-section > div.menu > div.command {
+    font-size: 0;
+    line-height: 0;
+    margin: 0 0 2vh 0;
+    white-space: nowrap;
+    text-align: right;
+}
+#body-section > div.menu > div.command > div.name {
+    display: block;
+/*    font-size: 4.2vh;*/
+    font-size: 10vw;
+/*    line-height: 6vh;*/
+/*    line-height: 8vh;*/
+    line-height: 5vh;
+    font-weight: 500;
+    vertical-align: middle;
+/*    letter-spacing: -0.1em;*/
+/*    padding: 0 1vh;*/
+    padding: 1vh 1vh;
+    margin: 0 0 1.5vh 0;
+    text-align: left;
+    color: #219228;
+    background: #ddffdd;
+    overflow: hidden;
+    white-space: normal;
+}
+#body-section > div.menu > div.command > div.btn {
+    display: inline-block;
+    width: max-content;
+    padding: 1.5vh 3vh;
+    margin: 0 0 0 0;
+    font-size: 4.0vh;
+    line-height: 4.0vh;
+    font-weight: 700!important;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 1.5vh;
+    cursor: pointer;
+}
+
+#body-section > div.menu > div.logo {
+    position: absolute;
+    width: 100%;
+    height: 17.5vh;
+    top: 1.5vh;
+    left: 0;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 17.5vh;
+    background: white;
+    transform: scale(1, 1);
+    opacity: 100;
+    -webkit-transition: 0.5s;
+    -moz-transition: 0.5s;
+    -o-transition: 0.5s;
+    -ms-transition: 0.5s;
+    transition: 0.5s;
+}
+#body-section > div.menu > div.logo.hidden {
+    opacity: 0;
+    transform: scale(0, 0);
+}
+#body-section > div.menu > div.logo > img {
+    width: auto;
+    height: 15vh;
+}
+
+#body-section > div.menu > div.code {
+    height: 8vh;
+    padding: 0;
+    margin: 0 0 2vh 0;
+    text-align: center;
+}
+#body-section > div.menu > div.code > p#enter {
+    display: inline-block;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    border: solid 0.5vh #219228;
+    border-radius: 0.5vh;
+    font-size: 6vh;
+    line-height: 7vh;
+    font-weight: 900;
+    letter-spacing: -0.1em;
+    text-align: center;
+    vertical-align: middle;
+    letter-spacing: 0;
+    overflow: hidden;
+}
+
+#body-section > div.menu > div.tenkey {
+
+}
+
+#body-section > div.menu > div.tenkey > ul {
+    list-style: none;
+    font-size: 0;
+    line-height: 0;
+}
+
+#body-section > div.menu > div.tenkey > ul > li {
+    display: inline-block;
+    width: calc((100% - (0.5vh * 2)) / 3);
+/*    height: 8vh;*/
+    height: 7.5vh;
+    font-size: 6vh;
+/*    line-height: 8vh;*/
+    line-height: 7.5vh;
+    font-weight: 700;
+    text-align: center;
+    vertical-align: middle;
+    margin: 0 0.5vh 0.5vh 0;
+    border-radius: 1.5vh;
+/*    border: solid 2px rgba(102,102,102,1);
+    color: white;
+    background: rgba(102,102,102,1);
+    background: linear-gradient(0deg, rgba(102,102,102,1) 0%, rgba(102,102,102,1) 50%, rgba(170,170,170,1) 100%);*/
+    cursor: pointer;
+}
+#body-section > div.menu > div.tenkey > ul > li.del {
+    font-size: 4.0vh;
+/*    border: solid 2px rgb(10,165,70);
+    background: rgb(10,165,70);
+    background: linear-gradient(0deg, rgba(10,165,70,1) 0%, rgba(10,165,70,1) 50%, rgba(100,255,160,1) 100%);*/
+}
+#body-section > div.menu > div.tenkey > ul > li.clear {
+/*    font-size: 4.0vh;
+    border: solid 2px rgb(204,0,0);
+    background: rgb(204,0,0);
+    background: linear-gradient(0deg, rgba(204,0,0,1) 0%, rgba(204,0,0,1) 50%, rgba(255,165,165,1) 100%);*/
+    font-size: 0;
+    border: solid 2px transparent;
+    background: transparent;
+    background: linear-gradient(0deg, transparent 0%, transparent 50%, transparent 100%);
+}
+#body-section > div.menu > div.tenkey > ul > li:nth-child(3n) {
+    margin-right: 0;
+}
+#body-section > div.menu > div.tenkey > ul > li:nth-last-child(-n+3) {
+    margin-bottom: 0;
+}
+
+#body-section > div.detail > div > dl.name {
+    list-style: none;
+    font-size: 0;
+    line-height: 0;
+    margin: 0 0 2vh 0;
+    padding: 0;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-box;
+    display: -webkit-flexbox;
+    display: -moz-flexbox;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flex;
+    display: flex;
+    -webkit-box-lines: multiple;
+    -moz-box-lines: multiple;
+    -webkit-flex-wrap: wrap;
+    -moz-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+}
+#body-section > div.detail > div > dl.name > * {
+    display: inline-block;
+    font-size: 8vw;
+    line-height: 125%;
+    font-weight: 500;
+}
+/*#body-section > div.detail > div > dl.name > dt {
+    width: 68vw;
+}
+#body-section > div.detail > div > dl.name > dd {
+    width: 28vw;
+    text-align: right;
+}*/
+#body-section > div.detail > div > dl.name > dt {
+    width: 70%;
+}
+#body-section > div.detail > div.mod > dl.name > dt {
+    display: inline-block;
+    width: max-content;
+    margin: 0 22vh 0 auto;
+}
+#body-section > div.detail > div.mod > dl.name > dt:before {
+    content: '��';
+    display: inline-block;
+    font-size: 8vw;
+    line-height: 100%;
+    padding: 0;
+    margin: 0 0.4em 0 0;
+}
+#body-section > div.detail > div > dl.name > dd {
+    width: 100%;
+    text-align: right;
+    margin-top: -1.2em;
+}
+#body-section > div.detail > div > ul.amount {
+    list-style: none;
+    width: fit-content;
+    margin: 0 0 2vh auto;
+    padding: 0;
+    font-size: 0;
+    line-height: 0;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-box;
+    display: -webkit-flexbox;
+    display: -moz-flexbox;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flex;
+    display: flex;
+    -webkit-box-lines: multiple;
+    -moz-box-lines: multiple;
+    -webkit-flex-wrap: wrap;
+    -moz-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+}
+#body-section > div.detail > div > ul.amount > li {
+    width: auto;
+    height: 5vh;
+    padding: 0;
+    margin: 0 0 0 2vh;
+    font-size: 3.5vh;
+    line-height: 125%;
+    font-weight: 700;
+    text-align: center;
+    vertical-align: middle;
+}
+#body-section > div.detail > div > ul.amount > li.cmd {
+    width: 5vh;
+    border: solid 0.5vh #219228;
+    border-radius: 1.0vh;
+    cursor: pointer;
+}
+#body-section > div.detail > div > ul.amount > li > input {
+    width: 2em;
+    height: 5vh;
+    padding: 0;
+    margin: 0;
+    font-size: 3.5vh;
+    line-height: 4.5vh;
+    font-weight: 700;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+#body-section > div.detail > div > #guide {
+    display: block;
+    position: relative;
+    width: 100%;
+    padding: 2vw 4vw;
+    margin: 5vh 0 0 0;
+    background-color: #ffffff;
+    color: #333;
+    line-height: 125%;
+    text-align: justify;
+    border-radius: 2vw;
+    border: solid 1px forestgreen;
+    filter: drop-shadow(0.6vw 0.6vw 0.6vw rgba(66, 66, 66, 0.6));
+    -moz-animation: cssAnimation3 10s ease-in 0s forwards;
+    -webkit-animation: cssAnimation3 10s ease-in 0s forwards;
+    -o-animation: cssAnimation3 10s ease-in 0s forwards;
+    animation: cssAnimation3 10s ease-in 0s forwards;
+    -webkit-animation-fill-mode: forwards;
+    animation-fill-mode: forwards;
+}
+#body-section > div.detail > div > #guide.show {
+
+}
+@keyframes cssAnimation3 {
+    0% {
+        opacity: 0;
+        transform: translate(0, -90%) scale(100%, 0);
+    }
+    5% {
+        opacity: 0;
+        transform: translate(0, -90%) scale(100%, 0);
+    }
+    10% {
+        opacity: 100;
+        transform: translate(0, 0%) scale(100%, 100%);
+    }
+    100% {
+        opacity: 100;
+        transform: translate(0, 0%) scale(100%, 100%);
+    }
+}
+@-webkit-keyframes cssAnimation3 {
+    0% {
+        opacity: 0;
+        transform: translate(0, -90%) scale(100%, 0);
+    }
+    5% {
+        opacity: 0;
+        transform: translate(0, -90%) scale(100%, 0);
+    }
+    10% {
+        opacity: 100;
+        transform: translate(0, 0%) scale(100%, 100%);
+    }
+    100% {
+        opacity: 100;
+        transform: translate(0, 0%) scale(100%, 100%);
+    }
+}
+#body-section > div.detail > div > #guide > .balloon-arrow {
+    position: absolute;
+    display: block;
+    width: 2vh;
+    height: 5vh;
+    top: -5vh;
+    right: 10vh;
+}
+#body-section > div.detail > div > #guide > .balloon-arrow:before {
+    content: '';
+    position: absolute;
+    display: block;
+    width: 0;
+    height: 0;
+    top: 0;
+    right: 0;
+    border-top: 5vh solid transparent;
+    border-right: 2vh solid forestgreen;
+}
+#body-section > div.detail > div > #guide > .balloon-arrow:after {
+    content: '';
+    position: absolute;
+    display: block;
+    width: 0;
+    height: 0;
+    top: 5px;
+    right: 1px;
+    border-top: 5.5vh solid transparent;
+    border-right: 2.2vh solid #ffffff;
+}
+
+#body-section > div.detail > div > #guide > .msg-base {
+/*    position: absolute;
+    padding: 2vw 4vw;
+    top: calc(50% - (8.1vw + 2vw) / 2);
+    left: 0;
+    transform: translateY(-50%);*/
+}
+
+#body-section > div.detail > div > #guide > .msg-base > img {
+    width: 13vw;
+    height: auto;
+    padding: 0;
+    margin: 0.6em 3vw 0 0;
+    border: 0;
+}
+#body-section > div.detail > div > #guide > .msg-base > span {
+    display: inline-block;
+    width: calc(100% - 16vw - 1vh);
+    vertical-align: top;
+    font-size: 6vw;
+    line-height: 150%;
+    text-align: justify;
+}
+
+#body-section > div.detail > div.command {
+    font-size: 0;
+    line-height: 0;
+    margin: 5vh 0 0 0;
+    white-space: nowrap;
+    text-align: center;
+}
+#body-section > div.detail > div.command > div.btn {
+    display: inline-block;
+    width: max-content;
+    padding: 1.5vh 2vh;
+    margin: 0 2vh 0 0;
+    font-size: 3.0vh;
+    line-height: 4.0vh;
+    font-weight: 700!important;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 1.5vh;
+    cursor: pointer;
+}
+#body-section > div.detail > div.command > div.btn:last-child {
+    margin: 0 0 0 0;
+}
+
+#body-section.detail > div.menu {
+    display: none;
+}
+#body-section:not(.detail) > div.menu {
+    display: block;
+}
+#body-section.detail > div.detail {
+    display: block;
+}
+#body-section:not(.detail) > div.detail {
+    display: none;
+}
+
+.notice-balloon {
+    padding: 2vw 4vw;
+    border-radius: 2vw;
+    filter: drop-shadow(0.6vw 0.6vw 0.6vw rgba(66, 66, 66, 0.6));
+    background-color: #ffffff;
+    color: #333;
+    border: solid 1px forestgreen;
+}
+.notice-balloon.show {
+    -moz-animation: cssAnimation2 15s ease-in 0s forwards;
+    -webkit-animation: cssAnimation2 15s ease-in 0s forwards;
+    -o-animation: cssAnimation2 15s ease-in 0s forwards;
+    animation: cssAnimation2 15s ease-in 0s forwards;
+    -webkit-animation-fill-mode: forwards;
+    animation-fill-mode: forwards;
+}
+@keyframes cssAnimation2 {
+    0% {
+        opacity: 0;
+        transform: translate(0, -80%) scale(100%, 0);
+        pointer-events: auto;
+    }
+    5% {
+        opacity: 0;
+        transform: translate(0, -80%) scale(100%, 0);
+        pointer-events: auto;
+    }
+    10% {
+        opacity: 100;
+        transform: translate(0, 0%) scale(100%, 100%);
+        pointer-events: auto;
+    }
+    95% {
+        opacity: 100;
+        transform: translate(0, 0%) scale(100%, 100%);
+        pointer-events: auto;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(0, 0%) scale(100%, 100%);
+        pointer-events: none;
+    }
+/*    0% {
+        opacity: 0;
+        transform: translate(0, -100%);
+        pointer-events: auto;
+    }
+    5% {
+        opacity: 0;
+        transform: translate(0, -100%);
+        pointer-events: auto;
+    }
+    10% {
+        opacity: 100;
+        transform: translate(0, 0);
+        pointer-events: auto;
+    }
+    95% {
+        opacity: 100;
+        transform: translate(0, 0);
+        pointer-events: auto;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(0, 0);
+        pointer-events: none;
+    }*/
+}
+@-webkit-keyframes cssAnimation2 {
+    0% {
+        opacity: 0;
+        transform: translate(0, -80%) scale(100%, 0);
+        pointer-events: auto;
+    }
+    5% {
+        opacity: 0;
+        transform: translate(0, -80%) scale(100%, 0);
+        pointer-events: auto;
+    }
+    10% {
+        opacity: 100;
+        transform: translate(0, 0%) scale(100%, 100%);
+        pointer-events: auto;
+    }
+    95% {
+        opacity: 100;
+        transform: translate(0, 0%) scale(100%, 100%);
+        pointer-events: auto;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(0, 0%) scale(100%, 100%);
+        pointer-events: none;
+    }
+}
+.notice-balloon > .balloon-arrow {
+    width: 4.8vh;
+    height: 12vh;
+    top: -12vh;
+    left: 1em;
+}
+.notice-balloon > .balloon-arrow:before {
+    border-top: 12vh solid transparent;
+    border-left: 4.8vh solid forestgreen;
+    border-bottom: none;
+    border-right: none;
+}
+.notice-balloon > .balloon-arrow:after {
+    top: 5px;
+    left: 1px;
+    border-top: 13.2vh solid transparent;
+    border-left: 5.28vh solid #ffffff;
+    border-bottom: none;
+    border-right: none;
+}
+
+.notice-balloon > .msg-base {
+    position: absolute;
+    padding: 2vw 4vw;
+    top: calc(50% - (8.1vw + 2vw) / 2);
+    left: 0;
+    transform: translateY(-50%);
+}
+
+.notice-balloon > .msg-base > img {
+    width: 15vw;
+    height: auto;
+    padding: 0;
+    margin: 0 3vw 0 0;
+    border: 0;
+}
+.notice-balloon > .msg-base > span {
+    display: inline-block;
+    width: calc(100% - 18vw - 1vh);
+    vertical-align: top;
+    font-size: 6vw;
+    line-height: 150%;
+    text-align: justify;
+}
+.notice-balloon .ui-dialog-buttonset {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin: 2vw 4vw;
+}
+
+#order-add, #do-account {
+/*    display: none!important;*/
+}

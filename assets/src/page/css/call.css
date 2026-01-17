@@ -1,0 +1,84 @@
+
+@charset "UTF-8";
+
+@-ms-viewport {
+    width: device-width;
+}
+
+#body-section > div.call {
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: auto;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    -webkit- transform: translateY(-50%) translateX(-50%);
+    padding: 0;
+    margin: 0;
+}
+
+#body-section > div.call > ul > li.btn {
+    display: block;
+    position: relative;
+    width: 90vw;
+    padding: 2.3vh 2vw 2vh 17vw;
+    margin: 0 auto 8vh auto;
+    font-size: 7.5vw;
+    line-height: 7vh;
+    font-weight: 500!important;
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap;
+    border-radius: 1.5vh;
+    cursor: pointer;
+}
+#body-section > div.call > ul > li.btn::before {
+    content: '';
+    display: inline-block;
+    position: absolute;
+    width: 10vw;
+    height: 10vw;
+    left: 4vw;
+    top: 50%;
+    transform: translateY(-50%);
+    -webkit- transform: translateY(-50%);
+    background-size: 10vw 10vw;
+    background-repeat: no-repeat;
+}
+/*#body-section > div.call > ul > li.btn {
+    display: block;
+    position: relative;
+    width: 90vw;
+    padding: 2.3vh 3vh 2vh 10vh;
+    margin: 0 auto 8vh auto;
+    font-size: 3.8vh;
+    line-height: 7vh;
+    font-weight: 500!important;
+    text-align: left;
+    vertical-align: middle;
+    border-radius: 1.5vh;
+    cursor: pointer;
+}
+#body-section > div.call > ul > li.btn::before {
+    content: '';
+    display: inline-block;
+    position: absolute;
+    width: 6vh;
+    height: 6vh;
+    left: 3vh;
+    background-size: 6vh 6vh;
+    background-repeat: no-repeat;
+}*/
+#body-section > div.call > ul > li.btn#call-staff::before {
+    background-image: url(../../../src/page/img/ico-staff.svg);
+}
+#body-section > div.call > ul > li.btn#call-after::before {
+    background-image: url(../../../src/page/img/ico-desert.svg);
+}
+#body-section > div.call > ul > li.btn:last-child {
+    margin-bottom: 0;
+}
+#body-section > div.call > ul > li.btn.no-use {
+    display: none;
+}

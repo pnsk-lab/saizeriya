@@ -1,0 +1,3750 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+account.js
+call.js
+history.js
+main.js
+menu.js
+number.js
+top.js
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="account.js">
+$(function(){
+	console.log("ready");
+	
+	//ボディの高さを調整
+	body = $('#footer').offset().top - ($('#header').offset().top + $('#header').height()) - (Number($('#body-section').css('padding-top').replace('px', '')) + Number($('#body-section').css('padding-bottom').replace('px', '')));
+	$('#body-section').height(body);
+	
+	//各プロシージャ呼出
+	if(typeof onReadyExpand == 'function')
+		onReadyExpand();
+	
+	// imgタグにtitleを追加する
+	$("img[alt],a[alt],div[alt],li[alt],area[alt]").each(function(){
+		var a=$(this).attr("alt");
+		if(a.length>0&&!$(this).attr("title")){
+			$(this).attr("title",a);
+		}
+	});
+});
+
+//メッセージボックス表示時のスクロール無効化
+function handleTouchMove(event) {
+	if(!isPinchZooming()){
+		event.preventDefault();
+	}
+}
+
+//ピンチズームされているかを調べる
+function isPinchZooming() {
+	if ('visualViewport' in window) {
+		return window.visualViewport.scale > 1
+	} else {
+		return document.documentElement.clientWidth > window.innerWidth
+	}
+}
+
+//スクロール制御
+var scrollPos = 0;
+function disableScroll(reset = true) {
+	if(reset){
+		scrollPos = $(window).scrollTop();
+		$('body').css({
+			'position': 'fixed',
+			'width': '100%',
+			'z-index': '1',
+			'top': -scrollPos
+		});
+	}
+	else{
+		$('body').css({
+			'position': 'relative',
+			'width': 'auto',
+			'top': 'auto'
+		});
+		$('html, body').scrollTop(scrollPos);
+	}
+}
+
+$(window).on('load', function(){
+	console.log("load");
+
+	//メッセージボックス定義
+	$.alert = function(message){
+		var dfd = $.Deferred();
+		// ダイアログを作成
+		var dlg = $("<div></div>").dialog({
+			modal: true,
+			width: '80vw',
+			position: {my: "center center", at: "center center", of: "#base-overlay"},
+			appendTo: "#base-overlay",
+			buttons: {
+				"OK": function(){
+					$(this).dialog("close");
+					dfd.resolve();
+				}
+			},
+			close: function() {
+				disableScroll(false);
+				//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+				$('#base-overlay').remove();
+			}
+		});
+		dlg.html(message);
+		return dfd.promise();
+	};
+
+	$.confirm = function(message, reverse){
+		var dfd = $.Deferred();
+		// ダイアログを作成
+		if(!reverse){
+			var dlg = $("<div></div>").dialog({
+				modal: true,
+				width: '80vw',
+				position: {my: "center center", at: "center center", of: "#base-overlay"},
+				appendTo: "#base-overlay",
+				buttons: {
+					"いいえ": function(event, ui){
+						$(this).dialog("close");
+						dfd.resolve("cancel");
+					},
+					"はい": function(){
+						$(this).dialog("close");
+						dfd.resolve("yes");
+					}
+				},
+				close: function() {
+					disableScroll(false);
+					//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+					$('#base-overlay').remove();
+				}
+			});
+		}
+		else{
+			var dlg = $("<div></div>").dialog({
+				modal: true,
+				width: '80vw',
+				position: {my: "center center", at: "center center", of: "#base-overlay"},
+				appendTo: "#base-overlay",
+				buttons: {
+					"はい": function(){
+						$(this).dialog("close");
+						dfd.resolve("yes");
+					},
+					"いいえ": function(event, ui){
+						$(this).dialog("close");
+						dfd.resolve("cancel");
+					}
+				},
+				close: function() {
+					disableScroll(false);
+					//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+					$('#base-overlay').remove();
+				}
+			});
+		}
+		dlg.html(message);
+		return dfd.promise();
+	};
+
+	window.old_alert = window.alert;
+	window.alert =  function(message, okCallback=function(){}){
+		if($('body').find('#base-overlay').length > 0)
+			return;
+		$('body').append('<div id="base-overlay" class="ui-widget-overlay ui-front" style="z-index: 9999998;"></div>');
+		disableScroll();
+		//document.addEventListener('touchmove', handleTouchMove, { passive: false });
+		$.alert(message)
+		.then(function(status){
+			okCallback();
+			disableScroll(false);
+			//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+			$('#base-overlay').remove();
+		});
+		//一番後ろのボタンにフォーカス
+		$('.ui-dialog-buttonset>button:last-child').focus();
+	}
+	window.old_confirm = window.confirm;
+	window.confirm =  function(message, okCallback, cancelCallback=function(){}, reverse=false){
+		if($('body').find('#base-overlay').length > 0)
+			return;
+		$('body').append('<div id="base-overlay" class="ui-widget-overlay ui-front" style="z-index: 9999998;"></div>');
+		disableScroll();
+		//document.addEventListener('touchmove', handleTouchMove, { passive: false });
+		$.confirm(message, reverse)
+		.then(function(status){
+			var ret = (status === "yes");
+			if(ret)
+				okCallback();
+			else
+				cancelCallback();
+			disableScroll(false);
+			//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+			$('#base-overlay').remove();
+		});
+		//一番後ろのボタンにフォーカス
+		$('.ui-dialog-buttonset>button:last-child').focus();
+	}
+
+	//タイトル点滅
+	$('div#header>h1').addClass('blinking');
+
+	//各プロシージャ呼出
+	if(typeof onLoadExpand == 'function')
+		onLoadExpand();
+
+	//メッセージがあれば表示（スクロール完成後に表示の為ディレイ処理）
+	if($('#message').val() != ''){
+		setTimeout(function(){
+			alert($('#message').val());
+			$('#message').val('');
+		},100);
+	}
+/*	if($('.notice-balloon:not(.show)').length > 0){
+		setTimeout(function(){
+			$('.notice-balloon').addClass('show');
+			$('#notice-sound')[0].currentTime = 0;
+			$('#notice-sound')[0].play();
+		},100);
+	}*/
+});
+
+$(window).on('orientationchange resize', function() {
+	console.log("orientationchange resize");
+	
+	//ボディの高さを調整
+	body = $('#footer').offset().top - ($('#header').offset().top + $('#header').height()) - (Number($('#body-section').css('padding-top').replace('px', '')) + Number($('#body-section').css('padding-bottom').replace('px', '')));
+	$('#body-section').height(body);
+	
+	//各プロシージャ呼出
+	if(typeof onResizeExpand == 'function')
+		onResizeExpand();
+});
+
+$(window).scroll(function(){
+	console.log("scroll");
+	
+	// 「ページトップへ」を表示
+	if($(this).scrollTop()>100){
+		$("#pagetop").fadeIn();
+	}else{
+		$("#pagetop").fadeOut();
+	}
+	
+	//各プロシージャ呼出
+	if(typeof onScrollExpand == 'function')
+		onScrollExpand();
+});
+        
+// 「ページトップへ」クリック時
+$(document).on({'click': function(){
+	$("body,html").animate({scrollTop:0},300);
+	return false;
+}},'#pagetop');
+
+// ヘッダー帯 クリック時
+$(document).on({'click': function(){
+	$('#proc').val('top');
+	$('#frm_ctrl').submit();
+	return false;
+}},'#header>h1');
+
+// スワイプ処理
+var sd, sx, sy, ey;
+$(window).on('touchstart', function(e){sx=e.originalEvent.touches[0].pageX;sy=e.originalEvent.touches[0].pageY;ey=e.originalEvent.touches[0].pageY;sd=''});
+$(window).on('touchmove', function(e){if(sx-e.originalEvent.touches[0].pageX>100){sd='L'}else if(sx-e.originalEvent.touches[0].pageX<-100){sd='R'};ey=e.originalEvent.touches[0].pageY});
+$(window).on('touchend', function(e){if($('#base-overlay').length) return; if(Math.abs(sy-ey)<25){if(sd=='R'){onSwipeRight()}else if(sd=='L'){onSwipeLeft()}}});
+
+// 注文追加クリック時
+$(document).on({'click': function(){
+	if ($(this).hasClass('disabled'))
+		return false;
+		
+	sid = String($('#shop-id').val()).trim();
+	$.ajax({	
+		url:"./src/cmd/check_lastorder.php",
+		type:"POST",
+		data:'sid=' + sid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('ラストオーダーの時間を過ぎている為、注文を送信できません。', function() {
+				$('#proc').val('account');
+				$('#ctrl').val('clear');
+				$('#frm_ctrl').submit();
+			});
+		}
+		else{
+			$('#proc').val('menu');
+			$('#frm_ctrl').submit();
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		$('#proc').val('menu');
+		$('#frm_ctrl').submit();
+	});
+	
+	return false;
+}},'#order-add');
+
+// 注文リストクリック時
+$(document).on({'click': function(){
+	if ($(this).hasClass('disabled'))
+		return false;
+		
+	sid = String($('#shop-id').val()).trim();
+	$.ajax({	
+		url:"./src/cmd/check_lastorder.php",
+		type:"POST",
+		data:'sid=' + sid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('ラストオーダーの時間を過ぎている為、注文を送信できません。', function() {
+				$('#proc').val('account');
+				$('#ctrl').val('clear');
+				$('#frm_ctrl').submit();
+			});
+		}
+		else{
+			$('#proc').val('main');
+			$('#frm_ctrl').submit();
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		$('#proc').val('main');
+		$('#frm_ctrl').submit();
+	});
+	
+	return false;
+}},'#order-list');
+
+// 注文履歴クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('history');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#order-history');
+
+// 店員呼出クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('call');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#after-call');
+
+// 会計クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('account');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#do-account');
+
+// バルーンクリック時
+$(document).on({'click': function(){
+	$(this).parent().parent().removeClass('show');
+	return false;
+}},'.notice-balloon .ui-dialog-buttonset button');
+
+function onReadyExpand(){
+	console.log("ready");
+	
+	//ボディ内オブジェクトの高さを調整
+	body = $('#body-section').height();
+	ls = getObjectHeight($('#body-section>div.list-base')) - $('#body-section>div.list-base').height();
+	am = getObjectHeight($('#body-section>div.amount'));
+	cm = getObjectHeight($('#body-section>div.command'));
+	$('#body-section>div.list-base').height(body - (ls + am + cm));
+	ls = getObjectHeight($('#body-section>div.list-base'));
+	hd = getObjectHeight($('#body-section>div.list-base>ul.header'));
+	$('#body-section>div.list-base>div.list').height(ls - hd - 2);
+}
+
+function onLoadExpand(){
+	console.log("load");
+	
+	//タイトル点滅
+	$('div#header>h1').addClass('blinking');
+}
+
+function onScrollExpand(){
+	console.log("scroll");
+	
+}
+
+function onResizeExpand() {
+	console.log("orientationchange resize");
+	
+	//ボディ内オブジェクトの高さを調整
+	body = $('#body-section').height();
+	ls = getObjectHeight($('#body-section>div.list-base')) - $('#body-section>div.list-base').height();
+	am = getObjectHeight($('#body-section>div.amount'));
+	cm = getObjectHeight($('#body-section>div.command'));
+	$('#body-section>div.list-base').height(body - (ls + am + cm));
+	ls = getObjectHeight($('#body-section>div.list-base'));
+	hd = getObjectHeight($('#body-section>div.list-base>ul.header'));
+	$('#body-section>div.list-base>div.list').height(ls - hd - 2);
+}
+
+$('#sidemenu').scroll(function(){
+	console.log("scroll_side");
+	
+});
+
+function onSwipeLeft(){
+    console.log('left swipe');
+	
+}
+function onSwipeRight(){
+    console.log('right swipe');
+	
+}
+
+// ブラウザーバック検知
+window.addEventListener('pageshow',()=>{
+/*	var state = window.performance.navigation.type;
+	console.log(state);
+	if (state == 2){
+		// 元に戻る
+		window.history.forward();
+		return false;
+	}*/
+});
+
+// 「確定」クリック時
+$(document).on({'click': function(){
+	
+/*	// 会計ファイルを作成
+	createAccountFile();*/
+	
+	// レシートページへ
+	$('#proc').val('receipt');
+	$('#frm_ctrl').submit();
+	
+	return false;
+}},'#decide');
+
+function createAccountFile(){
+	
+	sid = String($('#shop-id').val()).trim();
+	tno = String($('#table-no').val()).trim();
+	
+	$.ajax({	
+		url:"./src/cmd/check_out.php",
+		type:"POST",
+		data:'sid=' + sid + '&tno=' + tno,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] != 'OK'){
+			console.log('error [' + data['result'] + ']');
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+	}).always(function(){
+		
+	});
+	
+}
+
+function getObjectHeight(obj){
+	if(!obj.length)
+		return 0;
+	return obj.height() + (Number(obj.css('padding-top').replace('px', '')) + Number(obj.css('padding-bottom').replace('px', ''))) + (Number(obj.css('margin-top').replace('px', '')) + Number(obj.css('margin-bottom').replace('px', ''))) + (Number(obj.css('border-top-width').replace('px', '')) + Number(obj.css('border-bottom-width').replace('px', '')));
+}
+</file>
+
+<file path="call.js">
+$(function(){
+	console.log("ready");
+	
+	//ボディの高さを調整
+	body = $('#footer').offset().top - ($('#header').offset().top + $('#header').height()) - (Number($('#body-section').css('padding-top').replace('px', '')) + Number($('#body-section').css('padding-bottom').replace('px', '')));
+	$('#body-section').height(body);
+	
+	//各プロシージャ呼出
+	if(typeof onReadyExpand == 'function')
+		onReadyExpand();
+	
+	// imgタグにtitleを追加する
+	$("img[alt],a[alt],div[alt],li[alt],area[alt]").each(function(){
+		var a=$(this).attr("alt");
+		if(a.length>0&&!$(this).attr("title")){
+			$(this).attr("title",a);
+		}
+	});
+});
+
+//メッセージボックス表示時のスクロール無効化
+function handleTouchMove(event) {
+	if(!isPinchZooming()){
+		event.preventDefault();
+	}
+}
+
+//ピンチズームされているかを調べる
+function isPinchZooming() {
+	if ('visualViewport' in window) {
+		return window.visualViewport.scale > 1
+	} else {
+		return document.documentElement.clientWidth > window.innerWidth
+	}
+}
+
+//スクロール制御
+var scrollPos = 0;
+function disableScroll(reset = true) {
+	if(reset){
+		scrollPos = $(window).scrollTop();
+		$('body').css({
+			'position': 'fixed',
+			'width': '100%',
+			'z-index': '1',
+			'top': -scrollPos
+		});
+	}
+	else{
+		$('body').css({
+			'position': 'relative',
+			'width': 'auto',
+			'top': 'auto'
+		});
+		$('html, body').scrollTop(scrollPos);
+	}
+}
+
+$(window).on('load', function(){
+	console.log("load");
+
+	//メッセージボックス定義
+	$.alert = function(message){
+		var dfd = $.Deferred();
+		// ダイアログを作成
+		var dlg = $("<div></div>").dialog({
+			modal: true,
+			width: '80vw',
+			position: {my: "center center", at: "center center", of: "#base-overlay"},
+			appendTo: "#base-overlay",
+			buttons: {
+				"OK": function(){
+					$(this).dialog("close");
+					dfd.resolve();
+				}
+			},
+			close: function() {
+				disableScroll(false);
+				//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+				$('#base-overlay').remove();
+			}
+		});
+		dlg.html(message);
+		return dfd.promise();
+	};
+
+	$.confirm = function(message, reverse){
+		var dfd = $.Deferred();
+		// ダイアログを作成
+		if(!reverse){
+			var dlg = $("<div></div>").dialog({
+				modal: true,
+				width: '80vw',
+				position: {my: "center center", at: "center center", of: "#base-overlay"},
+				appendTo: "#base-overlay",
+				buttons: {
+					"いいえ": function(event, ui){
+						$(this).dialog("close");
+						dfd.resolve("cancel");
+					},
+					"はい": function(){
+						$(this).dialog("close");
+						dfd.resolve("yes");
+					}
+				},
+				close: function() {
+					disableScroll(false);
+					//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+					$('#base-overlay').remove();
+				}
+			});
+		}
+		else{
+			var dlg = $("<div></div>").dialog({
+				modal: true,
+				width: '80vw',
+				position: {my: "center center", at: "center center", of: "#base-overlay"},
+				appendTo: "#base-overlay",
+				buttons: {
+					"はい": function(){
+						$(this).dialog("close");
+						dfd.resolve("yes");
+					},
+					"いいえ": function(event, ui){
+						$(this).dialog("close");
+						dfd.resolve("cancel");
+					}
+				},
+				close: function() {
+					disableScroll(false);
+					//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+					$('#base-overlay').remove();
+				}
+			});
+		}
+		dlg.html(message);
+		return dfd.promise();
+	};
+
+	window.old_alert = window.alert;
+	window.alert =  function(message, okCallback=function(){}){
+		if($('body').find('#base-overlay').length > 0)
+			return;
+		$('body').append('<div id="base-overlay" class="ui-widget-overlay ui-front" style="z-index: 9999998;"></div>');
+		disableScroll();
+		//document.addEventListener('touchmove', handleTouchMove, { passive: false });
+		$.alert(message)
+		.then(function(status){
+			okCallback();
+			disableScroll(false);
+			//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+			$('#base-overlay').remove();
+		});
+		//一番後ろのボタンにフォーカス
+		$('.ui-dialog-buttonset>button:last-child').focus();
+	}
+	window.old_confirm = window.confirm;
+	window.confirm =  function(message, okCallback, cancelCallback=function(){}, reverse=false){
+		if($('body').find('#base-overlay').length > 0)
+			return;
+		$('body').append('<div id="base-overlay" class="ui-widget-overlay ui-front" style="z-index: 9999998;"></div>');
+		disableScroll();
+		//document.addEventListener('touchmove', handleTouchMove, { passive: false });
+		$.confirm(message, reverse)
+		.then(function(status){
+			var ret = (status === "yes");
+			if(ret)
+				okCallback();
+			else
+				cancelCallback();
+			disableScroll(false);
+			//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+			$('#base-overlay').remove();
+		});
+		//一番後ろのボタンにフォーカス
+		$('.ui-dialog-buttonset>button:last-child').focus();
+	}
+
+	//タイトル点滅
+	$('div#header>h1').addClass('blinking');
+
+	//各プロシージャ呼出
+	if(typeof onLoadExpand == 'function')
+		onLoadExpand();
+
+	//メッセージがあれば表示（スクロール完成後に表示の為ディレイ処理）
+	if($('#message').val() != ''){
+		setTimeout(function(){
+			alert($('#message').val());
+			$('#message').val('');
+		},100);
+	}
+/*	if($('.notice-balloon:not(.show)').length > 0){
+		setTimeout(function(){
+			$('.notice-balloon').addClass('show');
+			$('#notice-sound')[0].currentTime = 0;
+			$('#notice-sound')[0].play();
+		},100);
+	}*/
+});
+
+$(window).on('orientationchange resize', function() {
+	console.log("orientationchange resize");
+	
+	//ボディの高さを調整
+	body = $('#footer').offset().top - ($('#header').offset().top + $('#header').height()) - (Number($('#body-section').css('padding-top').replace('px', '')) + Number($('#body-section').css('padding-bottom').replace('px', '')));
+	$('#body-section').height(body);
+	
+	//各プロシージャ呼出
+	if(typeof onResizeExpand == 'function')
+		onResizeExpand();
+});
+
+$(window).scroll(function(){
+	console.log("scroll");
+	
+	// 「ページトップへ」を表示
+	if($(this).scrollTop()>100){
+		$("#pagetop").fadeIn();
+	}else{
+		$("#pagetop").fadeOut();
+	}
+	
+	//各プロシージャ呼出
+	if(typeof onScrollExpand == 'function')
+		onScrollExpand();
+});
+        
+// 「ページトップへ」クリック時
+$(document).on({'click': function(){
+	$("body,html").animate({scrollTop:0},300);
+	return false;
+}},'#pagetop');
+
+// ヘッダー帯 クリック時
+$(document).on({'click': function(){
+	$('#proc').val('top');
+	$('#frm_ctrl').submit();
+	return false;
+}},'#header>h1');
+
+// スワイプ処理
+var sd, sx, sy, ey;
+$(window).on('touchstart', function(e){sx=e.originalEvent.touches[0].pageX;sy=e.originalEvent.touches[0].pageY;ey=e.originalEvent.touches[0].pageY;sd=''});
+$(window).on('touchmove', function(e){if(sx-e.originalEvent.touches[0].pageX>100){sd='L'}else if(sx-e.originalEvent.touches[0].pageX<-100){sd='R'};ey=e.originalEvent.touches[0].pageY});
+$(window).on('touchend', function(e){if($('#base-overlay').length) return; if(Math.abs(sy-ey)<25){if(sd=='R'){onSwipeRight()}else if(sd=='L'){onSwipeLeft()}}});
+
+// 注文追加クリック時
+$(document).on({'click': function(){
+	if ($(this).hasClass('disabled'))
+		return false;
+		
+	sid = String($('#shop-id').val()).trim();
+	$.ajax({	
+		url:"./src/cmd/check_lastorder.php",
+		type:"POST",
+		data:'sid=' + sid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('ラストオーダーの時間を過ぎている為、注文を送信できません。', function() {
+				$('#proc').val('account');
+				$('#ctrl').val('clear');
+				$('#frm_ctrl').submit();
+			});
+		}
+		else{
+			$('#proc').val('menu');
+			$('#frm_ctrl').submit();
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		$('#proc').val('menu');
+		$('#frm_ctrl').submit();
+	});
+	
+	return false;
+}},'#order-add');
+
+// 注文リストクリック時
+$(document).on({'click': function(){
+	if ($(this).hasClass('disabled'))
+		return false;
+		
+	sid = String($('#shop-id').val()).trim();
+	$.ajax({	
+		url:"./src/cmd/check_lastorder.php",
+		type:"POST",
+		data:'sid=' + sid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('ラストオーダーの時間を過ぎている為、注文を送信できません。', function() {
+				$('#proc').val('account');
+				$('#ctrl').val('clear');
+				$('#frm_ctrl').submit();
+			});
+		}
+		else{
+			$('#proc').val('main');
+			$('#frm_ctrl').submit();
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		$('#proc').val('main');
+		$('#frm_ctrl').submit();
+	});
+	
+	return false;
+}},'#order-list');
+
+// 注文履歴クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('history');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#order-history');
+
+// 店員呼出クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('call');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#after-call');
+
+// 会計クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('account');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#do-account');
+
+// バルーンクリック時
+$(document).on({'click': function(){
+	$(this).parent().parent().removeClass('show');
+	return false;
+}},'.notice-balloon .ui-dialog-buttonset button');
+
+function onReadyExpand(){
+	console.log("ready");
+	
+}
+
+function onLoadExpand(){
+	console.log("load");
+	
+/*	sid = String($('#shop-id').val()).trim();
+	tno = String($('#table-no').val()).trim();
+	
+	$.ajax({	
+		url:"./src/cmd/check_order.php",
+		type:"POST",
+		data:'sid=' + sid + '&tno=' + tno,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK')		$('body').removeClass('start');
+		else							$('body').addClass('start');
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+	}).always(function(){
+		//ボディの高さを調整
+		body = $('#footer').offset().top - ($('#header').offset().top + $('#header').height()) - (Number($('#body-section').css('padding-top').replace('px', '')) + Number($('#body-section').css('padding-bottom').replace('px', '')));
+		$('#body-section').height(body);
+	});*/
+}
+
+function onScrollExpand(){
+	console.log("scroll");
+	
+}
+
+function onResizeExpand() {
+	console.log("orientationchange resize");
+	
+}
+
+function onSwipeLeft(){
+    console.log('left swipe');
+	
+}
+function onSwipeRight(){
+    console.log('right swipe');
+	
+}
+
+// 「スタッフ呼出」クリック時
+$(document).on({'click': function(){
+	var sid = $(this).parent().data('shop');
+	var tbl = $(this).parent().data('tbl');
+	var aft = false;
+	
+	console.log('Call Staff [sid:'+sid+' tbl:'+tbl+' aft:'+aft+']');
+	
+	$.ajax({	
+		url:"./src/cmd/tbl_call.php",
+		type:"POST",
+		data:'sid=' + sid + '&tbl=' + tbl + '&aft=' + aft,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('店員へ知らせました。<br />少々お待ちください。', function() {
+				// 応答あれば即トップへ
+				onClickClose();
+			});
+			// 数秒後にトップへ
+			setTimeout("onClickClose();", 5000);
+		}
+		else{
+			alert('店員の呼び出しができませんでした。[' + data['result'] + ']');
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		alert('店員の呼び出しができませんでした。');
+	}).always(function(){
+		
+	});
+	
+	return false;
+}},'#call-staff:not(.disabled)');
+
+// 「アフター請求」クリック時
+$(document).on({'click': function(){
+	var sid = $(this).parent().data('shop');
+	var sid = $(this).parent().data('shop');
+	var tbl = $(this).parent().data('tbl');
+	var aft = true;
+	
+	console.log('Call Staff [sid:'+sid+' tbl:'+tbl+' aft:'+aft+']');
+	
+	$.ajax({	
+		url:"./src/cmd/tbl_call.php",
+		type:"POST",
+		data:'sid=' + sid + '&tbl=' + tbl + '&aft=' + aft,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('店員へ知らせました。<br />少々お待ちください。', function() {
+				// 応答あれば即トップへ
+				onClickClose();
+			});
+			// 数秒後にトップへ
+			setTimeout("onClickClose();", 5000);
+		}
+		else{
+			alert('アフター請求ができませんでした。[' + data['result'] + ']');
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		alert('アフター請求ができませんでした。');
+	}).always(function(){
+		
+	});
+	
+	return false;
+}},'#call-after:not(.disabled)');
+
+function onClickClose(){
+	$('#proc').val('top');
+	$('#frm_ctrl').submit();
+}
+</file>
+
+<file path="history.js">
+$(function(){
+	console.log("ready");
+	
+	//ボディの高さを調整
+	body = $('#footer').offset().top - ($('#header').offset().top + $('#header').height()) - (Number($('#body-section').css('padding-top').replace('px', '')) + Number($('#body-section').css('padding-bottom').replace('px', '')));
+	$('#body-section').height(body);
+	
+	//各プロシージャ呼出
+	if(typeof onReadyExpand == 'function')
+		onReadyExpand();
+	
+	// imgタグにtitleを追加する
+	$("img[alt],a[alt],div[alt],li[alt],area[alt]").each(function(){
+		var a=$(this).attr("alt");
+		if(a.length>0&&!$(this).attr("title")){
+			$(this).attr("title",a);
+		}
+	});
+});
+
+//メッセージボックス表示時のスクロール無効化
+function handleTouchMove(event) {
+	if(!isPinchZooming()){
+		event.preventDefault();
+	}
+}
+
+//ピンチズームされているかを調べる
+function isPinchZooming() {
+	if ('visualViewport' in window) {
+		return window.visualViewport.scale > 1
+	} else {
+		return document.documentElement.clientWidth > window.innerWidth
+	}
+}
+
+//スクロール制御
+var scrollPos = 0;
+function disableScroll(reset = true) {
+	if(reset){
+		scrollPos = $(window).scrollTop();
+		$('body').css({
+			'position': 'fixed',
+			'width': '100%',
+			'z-index': '1',
+			'top': -scrollPos
+		});
+	}
+	else{
+		$('body').css({
+			'position': 'relative',
+			'width': 'auto',
+			'top': 'auto'
+		});
+		$('html, body').scrollTop(scrollPos);
+	}
+}
+
+$(window).on('load', function(){
+	console.log("load");
+
+	//メッセージボックス定義
+	$.alert = function(message){
+		var dfd = $.Deferred();
+		// ダイアログを作成
+		var dlg = $("<div></div>").dialog({
+			modal: true,
+			width: '80vw',
+			position: {my: "center center", at: "center center", of: "#base-overlay"},
+			appendTo: "#base-overlay",
+			buttons: {
+				"OK": function(){
+					$(this).dialog("close");
+					dfd.resolve();
+				}
+			},
+			close: function() {
+				disableScroll(false);
+				//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+				$('#base-overlay').remove();
+			}
+		});
+		dlg.html(message);
+		return dfd.promise();
+	};
+
+	$.confirm = function(message, reverse){
+		var dfd = $.Deferred();
+		// ダイアログを作成
+		if(!reverse){
+			var dlg = $("<div></div>").dialog({
+				modal: true,
+				width: '80vw',
+				position: {my: "center center", at: "center center", of: "#base-overlay"},
+				appendTo: "#base-overlay",
+				buttons: {
+					"いいえ": function(event, ui){
+						$(this).dialog("close");
+						dfd.resolve("cancel");
+					},
+					"はい": function(){
+						$(this).dialog("close");
+						dfd.resolve("yes");
+					}
+				},
+				close: function() {
+					disableScroll(false);
+					//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+					$('#base-overlay').remove();
+				}
+			});
+		}
+		else{
+			var dlg = $("<div></div>").dialog({
+				modal: true,
+				width: '80vw',
+				position: {my: "center center", at: "center center", of: "#base-overlay"},
+				appendTo: "#base-overlay",
+				buttons: {
+					"はい": function(){
+						$(this).dialog("close");
+						dfd.resolve("yes");
+					},
+					"いいえ": function(event, ui){
+						$(this).dialog("close");
+						dfd.resolve("cancel");
+					}
+				},
+				close: function() {
+					disableScroll(false);
+					//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+					$('#base-overlay').remove();
+				}
+			});
+		}
+		dlg.html(message);
+		return dfd.promise();
+	};
+
+	window.old_alert = window.alert;
+	window.alert =  function(message, okCallback=function(){}){
+		if($('body').find('#base-overlay').length > 0)
+			return;
+		$('body').append('<div id="base-overlay" class="ui-widget-overlay ui-front" style="z-index: 9999998;"></div>');
+		disableScroll();
+		//document.addEventListener('touchmove', handleTouchMove, { passive: false });
+		$.alert(message)
+		.then(function(status){
+			okCallback();
+			disableScroll(false);
+			//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+			$('#base-overlay').remove();
+		});
+		//一番後ろのボタンにフォーカス
+		$('.ui-dialog-buttonset>button:last-child').focus();
+	}
+	window.old_confirm = window.confirm;
+	window.confirm =  function(message, okCallback, cancelCallback=function(){}, reverse=false){
+		if($('body').find('#base-overlay').length > 0)
+			return;
+		$('body').append('<div id="base-overlay" class="ui-widget-overlay ui-front" style="z-index: 9999998;"></div>');
+		disableScroll();
+		//document.addEventListener('touchmove', handleTouchMove, { passive: false });
+		$.confirm(message, reverse)
+		.then(function(status){
+			var ret = (status === "yes");
+			if(ret)
+				okCallback();
+			else
+				cancelCallback();
+			disableScroll(false);
+			//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+			$('#base-overlay').remove();
+		});
+		//一番後ろのボタンにフォーカス
+		$('.ui-dialog-buttonset>button:last-child').focus();
+	}
+
+	//タイトル点滅
+	$('div#header>h1').addClass('blinking');
+
+	//各プロシージャ呼出
+	if(typeof onLoadExpand == 'function')
+		onLoadExpand();
+
+	//メッセージがあれば表示（スクロール完成後に表示の為ディレイ処理）
+	if($('#message').val() != ''){
+		setTimeout(function(){
+			alert($('#message').val());
+			$('#message').val('');
+		},100);
+	}
+/*	if($('.notice-balloon:not(.show)').length > 0){
+		setTimeout(function(){
+			$('.notice-balloon').addClass('show');
+			$('#notice-sound')[0].currentTime = 0;
+			$('#notice-sound')[0].play();
+		},100);
+	}*/
+});
+
+$(window).on('orientationchange resize', function() {
+	console.log("orientationchange resize");
+	
+	//ボディの高さを調整
+	body = $('#footer').offset().top - ($('#header').offset().top + $('#header').height()) - (Number($('#body-section').css('padding-top').replace('px', '')) + Number($('#body-section').css('padding-bottom').replace('px', '')));
+	$('#body-section').height(body);
+	
+	//各プロシージャ呼出
+	if(typeof onResizeExpand == 'function')
+		onResizeExpand();
+});
+
+$(window).scroll(function(){
+	console.log("scroll");
+	
+	// 「ページトップへ」を表示
+	if($(this).scrollTop()>100){
+		$("#pagetop").fadeIn();
+	}else{
+		$("#pagetop").fadeOut();
+	}
+	
+	//各プロシージャ呼出
+	if(typeof onScrollExpand == 'function')
+		onScrollExpand();
+});
+        
+// 「ページトップへ」クリック時
+$(document).on({'click': function(){
+	$("body,html").animate({scrollTop:0},300);
+	return false;
+}},'#pagetop');
+
+// ヘッダー帯 クリック時
+$(document).on({'click': function(){
+	$('#proc').val('top');
+	$('#frm_ctrl').submit();
+	return false;
+}},'#header>h1');
+
+// スワイプ処理
+var sd, sx, sy, ey;
+$(window).on('touchstart', function(e){sx=e.originalEvent.touches[0].pageX;sy=e.originalEvent.touches[0].pageY;ey=e.originalEvent.touches[0].pageY;sd=''});
+$(window).on('touchmove', function(e){if(sx-e.originalEvent.touches[0].pageX>100){sd='L'}else if(sx-e.originalEvent.touches[0].pageX<-100){sd='R'};ey=e.originalEvent.touches[0].pageY});
+$(window).on('touchend', function(e){if($('#base-overlay').length) return; if(Math.abs(sy-ey)<25){if(sd=='R'){onSwipeRight()}else if(sd=='L'){onSwipeLeft()}}});
+
+// 注文追加クリック時
+$(document).on({'click': function(){
+	if ($(this).hasClass('disabled'))
+		return false;
+		
+	sid = String($('#shop-id').val()).trim();
+	$.ajax({	
+		url:"./src/cmd/check_lastorder.php",
+		type:"POST",
+		data:'sid=' + sid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('ラストオーダーの時間を過ぎている為、注文を送信できません。', function() {
+				$('#proc').val('account');
+				$('#ctrl').val('clear');
+				$('#frm_ctrl').submit();
+			});
+		}
+		else{
+			$('#proc').val('menu');
+			$('#frm_ctrl').submit();
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		$('#proc').val('menu');
+		$('#frm_ctrl').submit();
+	});
+	
+	return false;
+}},'#order-add');
+
+// 注文リストクリック時
+$(document).on({'click': function(){
+	if ($(this).hasClass('disabled'))
+		return false;
+		
+	sid = String($('#shop-id').val()).trim();
+	$.ajax({	
+		url:"./src/cmd/check_lastorder.php",
+		type:"POST",
+		data:'sid=' + sid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('ラストオーダーの時間を過ぎている為、注文を送信できません。', function() {
+				$('#proc').val('account');
+				$('#ctrl').val('clear');
+				$('#frm_ctrl').submit();
+			});
+		}
+		else{
+			$('#proc').val('main');
+			$('#frm_ctrl').submit();
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		$('#proc').val('main');
+		$('#frm_ctrl').submit();
+	});
+	
+	return false;
+}},'#order-list');
+
+// 注文履歴クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('history');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#order-history');
+
+// 店員呼出クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('call');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#after-call');
+
+// 会計クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('account');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#do-account');
+
+// バルーンクリック時
+$(document).on({'click': function(){
+	$(this).parent().parent().removeClass('show');
+	return false;
+}},'.notice-balloon .ui-dialog-buttonset button');
+
+function onReadyExpand(){
+	console.log("ready");
+	
+	//ボディ内オブジェクトの高さを調整
+	body = $('#body-section').height();
+	ls = getObjectHeight($('#body-section>div.list-base')) - $('#body-section>div.list-base').height();
+	ms = getObjectHeight($('#body-section>div.message'));
+	am = getObjectHeight($('#body-section>div.amount'));
+	$('#body-section>div.list-base').height(body - (ls + ms + am));
+	ls = getObjectHeight($('#body-section>div.list-base'));
+	hd = getObjectHeight($('#body-section>div.list-base>ul.header'));
+	$('#body-section>div.list-base>div.list').height(ls - hd - 2);
+}
+
+function onLoadExpand(){
+	console.log("load");
+	
+}
+
+function onScrollExpand(){
+	console.log("scroll");
+	
+}
+
+function onResizeExpand() {
+	console.log("orientationchange resize");
+	
+	//ボディ内オブジェクトの高さを調整
+	body = $('#body-section').height();
+	ls = getObjectHeight($('#body-section>div.list-base')) - $('#body-section>div.list-base').height();
+	ms = getObjectHeight($('#body-section>div.message'));
+	am = getObjectHeight($('#body-section>div.amount'));
+	$('#body-section>div.list-base').height(body - (ls + ms + am));
+	ls = getObjectHeight($('#body-section>div.list-base'));
+	hd = getObjectHeight($('#body-section>div.list-base>ul.header'));
+	$('#body-section>div.list-base>div.list').height(ls - hd - 2);
+}
+
+$('#sidemenu').scroll(function(){
+	console.log("scroll_side");
+	
+});
+
+function onSwipeLeft(){
+    console.log('left swipe');
+	
+}
+function onSwipeRight(){
+    console.log('right swipe');
+	
+}
+
+// 「再注文」クリック時
+$(document).on({'click': function(){
+	
+	if($(this).hasClass('red')){
+		$('#proc').val('menu');
+		$('#ctrl').val('reorder');
+		$('#code').val($(this).data('id'));
+		$('#frm_ctrl').submit();
+	}
+	
+/*	cnt = 0;
+	$('#body-section>div.list>table>tbody>tr>td>ul.amount>li>input').each(function(i, e) {
+		cnt += parseInt($(e).val());
+	});
+	
+	sid = String($('#shop-id').val()).trim();
+	$.ajax({	
+		url:"./src/cmd/check_lastorder.php",
+		type:"POST",
+		data:'sid=' + sid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('ラストオーダーの時間を過ぎている為、注文を送信できません。', function() {
+				$('#proc').val('account');
+				$('#ctrl').val('clear');
+				$('#frm_ctrl').submit();
+			});
+		}
+		else{
+			if(cnt < 1){
+				alert('メニューを選んでから送信してください。');
+				return false;
+			}
+			confirm('注文を送信しますか？', function() {
+				$('#proc').val('order');
+				$('#frm_ctrl').submit();
+			});
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		if(cnt < 1){
+			alert('メニューを選んでから送信してください。');
+			return false;
+		}
+		confirm('注文を送信しますか？', function() {
+			$('#proc').val('order');
+			$('#frm_ctrl').submit();
+		});
+	});*/
+	return false;
+}},'.reorder');
+
+function getObjectHeight(obj){
+	if(!obj.length)
+		return 0;
+	return obj.height() + (Number(obj.css('padding-top').replace('px', '')) + Number(obj.css('padding-bottom').replace('px', ''))) + (Number(obj.css('margin-top').replace('px', '')) + Number(obj.css('margin-bottom').replace('px', ''))) + (Number(obj.css('border-top-width').replace('px', '')) + Number(obj.css('border-bottom-width').replace('px', '')));
+}
+</file>
+
+<file path="main.js">
+$(function(){
+	console.log("ready");
+	
+	//ボディの高さを調整
+	body = $('#footer').offset().top - ($('#header').offset().top + $('#header').height()) - (Number($('#body-section').css('padding-top').replace('px', '')) + Number($('#body-section').css('padding-bottom').replace('px', '')));
+	$('#body-section').height(body);
+	
+	//各プロシージャ呼出
+	if(typeof onReadyExpand == 'function')
+		onReadyExpand();
+	
+	// imgタグにtitleを追加する
+	$("img[alt],a[alt],div[alt],li[alt],area[alt]").each(function(){
+		var a=$(this).attr("alt");
+		if(a.length>0&&!$(this).attr("title")){
+			$(this).attr("title",a);
+		}
+	});
+});
+
+//メッセージボックス表示時のスクロール無効化
+function handleTouchMove(event) {
+	if(!isPinchZooming()){
+		event.preventDefault();
+	}
+}
+
+//ピンチズームされているかを調べる
+function isPinchZooming() {
+	if ('visualViewport' in window) {
+		return window.visualViewport.scale > 1
+	} else {
+		return document.documentElement.clientWidth > window.innerWidth
+	}
+}
+
+//スクロール制御
+var scrollPos = 0;
+function disableScroll(reset = true) {
+	if(reset){
+		scrollPos = $(window).scrollTop();
+		$('body').css({
+			'position': 'fixed',
+			'width': '100%',
+			'z-index': '1',
+			'top': -scrollPos
+		});
+	}
+	else{
+		$('body').css({
+			'position': 'relative',
+			'width': 'auto',
+			'top': 'auto'
+		});
+		$('html, body').scrollTop(scrollPos);
+	}
+}
+
+$(window).on('load', function(){
+	console.log("load");
+
+	//メッセージボックス定義
+	$.alert = function(message){
+		var dfd = $.Deferred();
+		// ダイアログを作成
+		var dlg = $("<div></div>").dialog({
+			modal: true,
+			width: '80vw',
+			position: {my: "center center", at: "center center", of: "#base-overlay"},
+			appendTo: "#base-overlay",
+			buttons: {
+				"OK": function(){
+					$(this).dialog("close");
+					dfd.resolve();
+				}
+			},
+			close: function() {
+				disableScroll(false);
+				//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+				$('#base-overlay').remove();
+			}
+		});
+		dlg.html(message);
+		return dfd.promise();
+	};
+
+	$.confirm = function(message, reverse){
+		var dfd = $.Deferred();
+		// ダイアログを作成
+		if(!reverse){
+			var dlg = $("<div></div>").dialog({
+				modal: true,
+				width: '80vw',
+				position: {my: "center center", at: "center center", of: "#base-overlay"},
+				appendTo: "#base-overlay",
+				buttons: {
+					"いいえ": function(event, ui){
+						$(this).dialog("close");
+						dfd.resolve("cancel");
+					},
+					"はい": function(){
+						$(this).dialog("close");
+						dfd.resolve("yes");
+					}
+				},
+				close: function() {
+					disableScroll(false);
+					//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+					$('#base-overlay').remove();
+				}
+			});
+		}
+		else{
+			var dlg = $("<div></div>").dialog({
+				modal: true,
+				width: '80vw',
+				position: {my: "center center", at: "center center", of: "#base-overlay"},
+				appendTo: "#base-overlay",
+				buttons: {
+					"はい": function(){
+						$(this).dialog("close");
+						dfd.resolve("yes");
+					},
+					"いいえ": function(event, ui){
+						$(this).dialog("close");
+						dfd.resolve("cancel");
+					}
+				},
+				close: function() {
+					disableScroll(false);
+					//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+					$('#base-overlay').remove();
+				}
+			});
+		}
+		dlg.html(message);
+		return dfd.promise();
+	};
+
+	window.old_alert = window.alert;
+	window.alert =  function(message, okCallback=function(){}){
+		if($('body').find('#base-overlay').length > 0)
+			return;
+		$('body').append('<div id="base-overlay" class="ui-widget-overlay ui-front" style="z-index: 9999998;"></div>');
+		disableScroll();
+		//document.addEventListener('touchmove', handleTouchMove, { passive: false });
+		$.alert(message)
+		.then(function(status){
+			okCallback();
+			disableScroll(false);
+			//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+			$('#base-overlay').remove();
+		});
+		//一番後ろのボタンにフォーカス
+		$('.ui-dialog-buttonset>button:last-child').focus();
+	}
+	window.old_confirm = window.confirm;
+	window.confirm =  function(message, okCallback, cancelCallback=function(){}, reverse=false){
+		if($('body').find('#base-overlay').length > 0)
+			return;
+		$('body').append('<div id="base-overlay" class="ui-widget-overlay ui-front" style="z-index: 9999998;"></div>');
+		disableScroll();
+		//document.addEventListener('touchmove', handleTouchMove, { passive: false });
+		$.confirm(message, reverse)
+		.then(function(status){
+			var ret = (status === "yes");
+			if(ret)
+				okCallback();
+			else
+				cancelCallback();
+			disableScroll(false);
+			//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+			$('#base-overlay').remove();
+		});
+		//一番後ろのボタンにフォーカス
+		$('.ui-dialog-buttonset>button:last-child').focus();
+	}
+
+	//タイトル点滅
+	$('div#header>h1').addClass('blinking');
+
+	//各プロシージャ呼出
+	if(typeof onLoadExpand == 'function')
+		onLoadExpand();
+
+	//メッセージがあれば表示（スクロール完成後に表示の為ディレイ処理）
+	if($('#message').val() != ''){
+		setTimeout(function(){
+			alert($('#message').val());
+			$('#message').val('');
+		},100);
+	}
+/*	if($('.notice-balloon:not(.show)').length > 0){
+		setTimeout(function(){
+			$('.notice-balloon').addClass('show');
+			$('#notice-sound')[0].currentTime = 0;
+			$('#notice-sound')[0].play();
+		},100);
+	}*/
+});
+
+$(window).on('orientationchange resize', function() {
+	console.log("orientationchange resize");
+	
+	//ボディの高さを調整
+	body = $('#footer').offset().top - ($('#header').offset().top + $('#header').height()) - (Number($('#body-section').css('padding-top').replace('px', '')) + Number($('#body-section').css('padding-bottom').replace('px', '')));
+	$('#body-section').height(body);
+	
+	//各プロシージャ呼出
+	if(typeof onResizeExpand == 'function')
+		onResizeExpand();
+});
+
+$(window).scroll(function(){
+	console.log("scroll");
+	
+	// 「ページトップへ」を表示
+	if($(this).scrollTop()>100){
+		$("#pagetop").fadeIn();
+	}else{
+		$("#pagetop").fadeOut();
+	}
+	
+	//各プロシージャ呼出
+	if(typeof onScrollExpand == 'function')
+		onScrollExpand();
+});
+        
+// 「ページトップへ」クリック時
+$(document).on({'click': function(){
+	$("body,html").animate({scrollTop:0},300);
+	return false;
+}},'#pagetop');
+
+// ヘッダー帯 クリック時
+$(document).on({'click': function(){
+	$('#proc').val('top');
+	$('#frm_ctrl').submit();
+	return false;
+}},'#header>h1');
+
+// スワイプ処理
+var sd, sx, sy, ey;
+$(window).on('touchstart', function(e){sx=e.originalEvent.touches[0].pageX;sy=e.originalEvent.touches[0].pageY;ey=e.originalEvent.touches[0].pageY;sd=''});
+$(window).on('touchmove', function(e){if(sx-e.originalEvent.touches[0].pageX>100){sd='L'}else if(sx-e.originalEvent.touches[0].pageX<-100){sd='R'};ey=e.originalEvent.touches[0].pageY});
+$(window).on('touchend', function(e){if($('#base-overlay').length) return; if(Math.abs(sy-ey)<25){if(sd=='R'){onSwipeRight()}else if(sd=='L'){onSwipeLeft()}}});
+
+// 注文追加クリック時
+$(document).on({'click': function(){
+	if ($(this).hasClass('disabled'))
+		return false;
+		
+	sid = String($('#shop-id').val()).trim();
+	$.ajax({	
+		url:"./src/cmd/check_lastorder.php",
+		type:"POST",
+		data:'sid=' + sid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('ラストオーダーの時間を過ぎている為、注文を送信できません。', function() {
+				$('#proc').val('account');
+				$('#ctrl').val('clear');
+				$('#frm_ctrl').submit();
+			});
+		}
+		else{
+			$('#proc').val('menu');
+			$('#frm_ctrl').submit();
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		$('#proc').val('menu');
+		$('#frm_ctrl').submit();
+	});
+	
+	return false;
+}},'#order-add');
+
+// 注文リストクリック時
+$(document).on({'click': function(){
+	if ($(this).hasClass('disabled'))
+		return false;
+		
+	sid = String($('#shop-id').val()).trim();
+	$.ajax({	
+		url:"./src/cmd/check_lastorder.php",
+		type:"POST",
+		data:'sid=' + sid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('ラストオーダーの時間を過ぎている為、注文を送信できません。', function() {
+				$('#proc').val('account');
+				$('#ctrl').val('clear');
+				$('#frm_ctrl').submit();
+			});
+		}
+		else{
+			$('#proc').val('main');
+			$('#frm_ctrl').submit();
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		$('#proc').val('main');
+		$('#frm_ctrl').submit();
+	});
+	
+	return false;
+}},'#order-list');
+
+// 注文履歴クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('history');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#order-history');
+
+// 店員呼出クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('call');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#after-call');
+
+// 会計クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('account');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#do-account');
+
+// バルーンクリック時
+$(document).on({'click': function(){
+	$(this).parent().parent().removeClass('show');
+	return false;
+}},'.notice-balloon .ui-dialog-buttonset button');
+
+function onReadyExpand(){
+	console.log("ready");
+	
+	//ボディ内オブジェクトの高さを調整
+	body = $('#body-section').height();
+	ls = getObjectHeight($('#body-section>div.list')) - $('#body-section>div.list').height();
+	am = getObjectHeight($('#body-section>div.amount'));
+	cm = getObjectHeight($('#body-section>div.command'));
+	$('#body-section>div.list').height(body - (ls + am + cm));
+}
+
+function onLoadExpand(){
+	console.log("load");
+	
+}
+
+function onScrollExpand(){
+	console.log("scroll");
+	
+}
+
+function onResizeExpand() {
+	console.log("orientationchange resize");
+	
+	//ボディ内オブジェクトの高さを調整
+	body = $('#body-section').height();
+	ls = getObjectHeight($('#body-section>div.list')) - $('#body-section>div.list').height();
+	am = getObjectHeight($('#body-section>div.amount'));
+	cm = getObjectHeight($('#body-section>div.command'));
+	$('#body-section>div.list').height(body - (ls + am + cm));
+}
+
+$('#sidemenu').scroll(function(){
+	console.log("scroll_side");
+	
+});
+
+function onSwipeLeft(){
+    console.log('left swipe');
+
+}
+function onSwipeRight(){
+    console.log('right swipe');
+	
+}
+
+// ブラウザーバック検知
+window.addEventListener('pageshow',()=>{
+	var state = window.performance.navigation.type;
+	console.log(state);
+	if (state == 2){
+		$('#body-section>div.list>table>tbody').empty();
+		$('#body-section>div.amount>p>span').html('0');
+		$('#menu>li#order-list >.count').remove();
+		alert('ブラウザーバックの為、カートをクリアしました。')
+	}
+});
+
+// 「×」クリック時
+var obj = null;
+$(document).on({'click': function(){
+	confirm('このメニューを削除してよろしいですか？', function() {
+		if (obj!=null){
+			obj.remove();
+			obj = null;
+			calcAmount();
+		}
+	});
+	obj = $(this).parents('tr');
+	return false;
+}},'div.list div.name>span,.del');
+
+// －ボタンをクリック時
+$(document).on({'click': function(){
+	ed = $(this).next().children('input');
+	md = $(this).parent().hasClass('mod-amount');
+	min = (ed.hasClass('zero')) ? 0 : 1;
+	amount = Number(ed.val());
+	amount--;
+	if (amount < min)
+		amount = min;
+	if(amount<=0 && !md){
+		amount = 1;
+		confirm('このメニューを削除してよろしいですか？', function() {
+			if (obj!=null){
+				obj.remove();
+				obj = null;
+				calcAmount();
+			}
+		});
+		obj = $(this).parents('tr');
+	}
+	ed.val(amount);
+	calcAmount();	
+	return false;
+}},'.minus');
+
+// ＋ボタンをクリック時
+$(document).on({'click': function(){
+	ed = $(this).prev().children('input');
+	min = (ed.hasClass('zero')) ? 0 : 1;
+	amount = Number(ed.val());
+	amount++;
+	if (amount > 99)
+		amount = 99;
+	ed.val(amount);
+	calcAmount();
+	return false;
+}},'.plus');
+
+// 「メニュー追加」クリック時
+$(document).on({'click': function(){
+
+	sid = String($('#shop-id').val()).trim();
+	$.ajax({	
+		url:"./src/cmd/check_lastorder.php",
+		type:"POST",
+		data:'sid=' + sid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('ラストオーダーの時間を過ぎている為、注文を送信できません。', function() {
+				$('#proc').val('account');
+				$('#ctrl').val('clear');
+				$('#frm_ctrl').submit();
+			});
+		}
+		else{
+			$('#proc').val('menu');
+			$('#frm_ctrl').submit();
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		$('#proc').val('menu');
+		$('#frm_ctrl').submit();
+	});
+	
+	return false;
+}},'#menu');
+
+// 「送信」クリック時
+$(document).on({'click': function(){
+	
+	cnt = 0;
+	$('#body-section>div.list>table>tbody>tr>td>ul.amount>li>input').each(function(i, e) {
+		cnt += parseInt($(e).val());
+	});
+	
+	sid = String($('#shop-id').val()).trim();
+	$.ajax({	
+		url:"./src/cmd/check_lastorder.php",
+		type:"POST",
+		data:'sid=' + sid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('ラストオーダーの時間を過ぎている為、注文を送信できません。', function() {
+				$('#proc').val('account');
+				$('#ctrl').val('clear');
+				$('#frm_ctrl').submit();
+			});
+		}
+		else{
+			if(cnt < 1){
+				alert('メニューを選んでから送信してください。');
+				return false;
+			}
+			confirm('注文を送信しますか？', function() {
+				$('#proc').val('order');
+				$('#frm_ctrl').submit();
+			});
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		if(cnt < 1){
+			alert('メニューを選んでから送信してください。');
+			return false;
+		}
+		confirm('注文を送信しますか？', function() {
+			$('#proc').val('order');
+			$('#frm_ctrl').submit();
+		});
+	});
+	return false;
+}},'#order');
+
+function calcAmount(){
+	line = 0;
+	count = 0;
+	amount = 0;
+	
+	$('#body-section tr').each(function(i, val) {
+		price = parseInt($(val).find('.price').html());
+		cnt = parseInt($(val).find('input#amount').val());
+		abs = cnt; if(abs < 0) abs = abs * (-1);
+		line = line + 1;
+		count = count + cnt;
+		amount = amount + price * abs;
+	});
+	
+	$('div#footer span.count').html(line);
+	$('div.amount>p.count>span').html(count);
+	$('div.amount>p.amount>span').html(amount.toLocaleString());
+	
+	return true;
+}
+
+function getObjectHeight(obj){
+	if(!obj.length)
+		return 0;
+	return obj.height() + (Number(obj.css('padding-top').replace('px', '')) + Number(obj.css('padding-bottom').replace('px', ''))) + (Number(obj.css('margin-top').replace('px', '')) + Number(obj.css('margin-bottom').replace('px', ''))) + (Number(obj.css('border-top-width').replace('px', '')) + Number(obj.css('border-bottom-width').replace('px', '')));
+}
+</file>
+
+<file path="menu.js">
+$(function(){
+	console.log("ready");
+	
+	//ボディの高さを調整
+	body = $('#footer').offset().top - ($('#header').offset().top + $('#header').height()) - (Number($('#body-section').css('padding-top').replace('px', '')) + Number($('#body-section').css('padding-bottom').replace('px', '')));
+	$('#body-section').height(body);
+	
+	//各プロシージャ呼出
+	if(typeof onReadyExpand == 'function')
+		onReadyExpand();
+	
+	// imgタグにtitleを追加する
+	$("img[alt],a[alt],div[alt],li[alt],area[alt]").each(function(){
+		var a=$(this).attr("alt");
+		if(a.length>0&&!$(this).attr("title")){
+			$(this).attr("title",a);
+		}
+	});
+});
+
+//メッセージボックス表示時のスクロール無効化
+function handleTouchMove(event) {
+	if(!isPinchZooming()){
+		event.preventDefault();
+	}
+}
+
+//ピンチズームされているかを調べる
+function isPinchZooming() {
+	if ('visualViewport' in window) {
+		return window.visualViewport.scale > 1
+	} else {
+		return document.documentElement.clientWidth > window.innerWidth
+	}
+}
+
+//スクロール制御
+var scrollPos = 0;
+function disableScroll(reset = true) {
+	if(reset){
+		scrollPos = $(window).scrollTop();
+		$('body').css({
+			'position': 'fixed',
+			'width': '100%',
+			'z-index': '1',
+			'top': -scrollPos
+		});
+	}
+	else{
+		$('body').css({
+			'position': 'relative',
+			'width': 'auto',
+			'top': 'auto'
+		});
+		$('html, body').scrollTop(scrollPos);
+	}
+}
+
+$(window).on('load', function(){
+	console.log("load");
+
+	//メッセージボックス定義
+	$.alert = function(message){
+		var dfd = $.Deferred();
+		// ダイアログを作成
+		var dlg = $("<div></div>").dialog({
+			modal: true,
+			width: '80vw',
+			position: {my: "center center", at: "center center", of: "#base-overlay"},
+			appendTo: "#base-overlay",
+			buttons: {
+				"OK": function(){
+					$(this).dialog("close");
+					dfd.resolve();
+				}
+			},
+			close: function() {
+				disableScroll(false);
+				//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+				$('#base-overlay').remove();
+			}
+		});
+		dlg.html(message);
+		return dfd.promise();
+	};
+
+	$.confirm = function(message, reverse){
+		var dfd = $.Deferred();
+		// ダイアログを作成
+		if(!reverse){
+			var dlg = $("<div></div>").dialog({
+				modal: true,
+				width: '80vw',
+				position: {my: "center center", at: "center center", of: "#base-overlay"},
+				appendTo: "#base-overlay",
+				buttons: {
+					"いいえ": function(event, ui){
+						$(this).dialog("close");
+						dfd.resolve("cancel");
+					},
+					"はい": function(){
+						$(this).dialog("close");
+						dfd.resolve("yes");
+					}
+				},
+				close: function() {
+					disableScroll(false);
+					//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+					$('#base-overlay').remove();
+				}
+			});
+		}
+		else{
+			var dlg = $("<div></div>").dialog({
+				modal: true,
+				width: '80vw',
+				position: {my: "center center", at: "center center", of: "#base-overlay"},
+				appendTo: "#base-overlay",
+				buttons: {
+					"はい": function(){
+						$(this).dialog("close");
+						dfd.resolve("yes");
+					},
+					"いいえ": function(event, ui){
+						$(this).dialog("close");
+						dfd.resolve("cancel");
+					}
+				},
+				close: function() {
+					disableScroll(false);
+					//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+					$('#base-overlay').remove();
+				}
+			});
+		}
+		dlg.html(message);
+		return dfd.promise();
+	};
+
+	window.old_alert = window.alert;
+	window.alert =  function(message, okCallback=function(){}){
+		if($('body').find('#base-overlay').length > 0)
+			return;
+		$('body').append('<div id="base-overlay" class="ui-widget-overlay ui-front" style="z-index: 9999998;"></div>');
+		disableScroll();
+		//document.addEventListener('touchmove', handleTouchMove, { passive: false });
+		$.alert(message)
+		.then(function(status){
+			okCallback();
+			disableScroll(false);
+			//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+			$('#base-overlay').remove();
+		});
+		//一番後ろのボタンにフォーカス
+		$('.ui-dialog-buttonset>button:last-child').focus();
+	}
+	window.old_confirm = window.confirm;
+	window.confirm =  function(message, okCallback, cancelCallback=function(){}, reverse=false){
+		if($('body').find('#base-overlay').length > 0)
+			return;
+		$('body').append('<div id="base-overlay" class="ui-widget-overlay ui-front" style="z-index: 9999998;"></div>');
+		disableScroll();
+		//document.addEventListener('touchmove', handleTouchMove, { passive: false });
+		$.confirm(message, reverse)
+		.then(function(status){
+			var ret = (status === "yes");
+			if(ret)
+				okCallback();
+			else
+				cancelCallback();
+			disableScroll(false);
+			//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+			$('#base-overlay').remove();
+		});
+		//一番後ろのボタンにフォーカス
+		$('.ui-dialog-buttonset>button:last-child').focus();
+	}
+
+	//タイトル点滅
+	$('div#header>h1').addClass('blinking');
+
+	//各プロシージャ呼出
+	if(typeof onLoadExpand == 'function')
+		onLoadExpand();
+
+	//メッセージがあれば表示（スクロール完成後に表示の為ディレイ処理）
+	if($('#message').val() != ''){
+		setTimeout(function(){
+			alert($('#message').val());
+			$('#message').val('');
+		},100);
+	}
+/*	if($('.notice-balloon:not(.show)').length > 0){
+		setTimeout(function(){
+			$('.notice-balloon').addClass('show');
+			$('#notice-sound')[0].currentTime = 0;
+			$('#notice-sound')[0].play();
+		},100);
+	}*/
+});
+
+$(window).on('orientationchange resize', function() {
+	console.log("orientationchange resize");
+	
+	//ボディの高さを調整
+	body = $('#footer').offset().top - ($('#header').offset().top + $('#header').height()) - (Number($('#body-section').css('padding-top').replace('px', '')) + Number($('#body-section').css('padding-bottom').replace('px', '')));
+	$('#body-section').height(body);
+	
+	//各プロシージャ呼出
+	if(typeof onResizeExpand == 'function')
+		onResizeExpand();
+});
+
+$(window).scroll(function(){
+	console.log("scroll");
+	
+	// 「ページトップへ」を表示
+	if($(this).scrollTop()>100){
+		$("#pagetop").fadeIn();
+	}else{
+		$("#pagetop").fadeOut();
+	}
+	
+	//各プロシージャ呼出
+	if(typeof onScrollExpand == 'function')
+		onScrollExpand();
+});
+        
+// 「ページトップへ」クリック時
+$(document).on({'click': function(){
+	$("body,html").animate({scrollTop:0},300);
+	return false;
+}},'#pagetop');
+
+// ヘッダー帯 クリック時
+$(document).on({'click': function(){
+	$('#proc').val('top');
+	$('#frm_ctrl').submit();
+	return false;
+}},'#header>h1');
+
+// スワイプ処理
+var sd, sx, sy, ey;
+$(window).on('touchstart', function(e){sx=e.originalEvent.touches[0].pageX;sy=e.originalEvent.touches[0].pageY;ey=e.originalEvent.touches[0].pageY;sd=''});
+$(window).on('touchmove', function(e){if(sx-e.originalEvent.touches[0].pageX>100){sd='L'}else if(sx-e.originalEvent.touches[0].pageX<-100){sd='R'};ey=e.originalEvent.touches[0].pageY});
+$(window).on('touchend', function(e){if($('#base-overlay').length) return; if(Math.abs(sy-ey)<25){if(sd=='R'){onSwipeRight()}else if(sd=='L'){onSwipeLeft()}}});
+
+// 注文追加クリック時
+$(document).on({'click': function(){
+	if ($(this).hasClass('disabled'))
+		return false;
+		
+	sid = String($('#shop-id').val()).trim();
+	$.ajax({	
+		url:"./src/cmd/check_lastorder.php",
+		type:"POST",
+		data:'sid=' + sid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('ラストオーダーの時間を過ぎている為、注文を送信できません。', function() {
+				$('#proc').val('account');
+				$('#ctrl').val('clear');
+				$('#frm_ctrl').submit();
+			});
+		}
+		else{
+			$('#proc').val('menu');
+			$('#frm_ctrl').submit();
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		$('#proc').val('menu');
+		$('#frm_ctrl').submit();
+	});
+	
+	return false;
+}},'#order-add');
+
+// 注文リストクリック時
+$(document).on({'click': function(){
+	if ($(this).hasClass('disabled'))
+		return false;
+		
+	sid = String($('#shop-id').val()).trim();
+	$.ajax({	
+		url:"./src/cmd/check_lastorder.php",
+		type:"POST",
+		data:'sid=' + sid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('ラストオーダーの時間を過ぎている為、注文を送信できません。', function() {
+				$('#proc').val('account');
+				$('#ctrl').val('clear');
+				$('#frm_ctrl').submit();
+			});
+		}
+		else{
+			$('#proc').val('main');
+			$('#frm_ctrl').submit();
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		$('#proc').val('main');
+		$('#frm_ctrl').submit();
+	});
+	
+	return false;
+}},'#order-list');
+
+// 注文履歴クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('history');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#order-history');
+
+// 店員呼出クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('call');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#after-call');
+
+// 会計クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('account');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#do-account');
+
+// バルーンクリック時
+$(document).on({'click': function(){
+	$(this).parent().parent().removeClass('show');
+	return false;
+}},'.notice-balloon .ui-dialog-buttonset button');
+
+function onReadyExpand(){
+	console.log("ready");
+	
+}
+
+function onLoadExpand(){
+	console.log("load");
+	
+	cd = String($('#enter').text()).trim();
+	if (cd.length == 4){
+		getMenuName(true);
+	}
+	
+	$.alcohol = function(title, message){
+		var dfd = $.Deferred();
+		// ダイアログを作成
+		var dlg = $("<div></div>").dialog({
+			modal: true,
+			width: '80vw',
+			position: {my: "center center", at: "center center", of: "#base-overlay"},
+			appendTo: "#base-overlay",
+			buttons: {
+				"もどる": function(event, ui){
+					$(this).dialog("close");
+					dfd.resolve("cancel");
+				},
+				"確認": function(){
+					$(this).dialog("close");
+					dfd.resolve("yes");
+				}
+			},
+			close: function() {
+				disableScroll(false);
+				$('#base-overlay').remove();
+			}
+		});
+		dlg.html('<h6 class="title">' + title + '</h6>' + '<p class="message">' + message + '</p>');
+		return dfd.promise();
+	};
+	window.alcohol =  function(title, message, okCallback, cancelCallback=function(){}){
+		if($('body').find('#base-overlay').length > 0)
+			return;
+		$('body').append('<div id="base-overlay" class="ui-widget-overlay ui-front" style="z-index: 9999998;"></div>');
+		disableScroll();
+		//document.addEventListener('touchmove', handleTouchMove, { passive: false });
+		$.alcohol(title, message)
+		.then(function(status){
+			var ret = (status === "yes");
+			if(ret)
+				okCallback();
+			else
+				cancelCallback();
+			disableScroll(false);
+			$('#base-overlay').remove();
+		});
+		//一番後ろのボタンにフォーカス
+		$('.ui-dialog-buttonset>button:last-child').focus();
+	}
+	
+	cd = String($('#enter').text()).trim();
+	if (cd.length == 4){
+		getMenuName(true);
+	}
+}
+
+function onScrollExpand(){
+	console.log("scroll");
+	
+}
+
+function onResizeExpand() {
+	console.log("orientationchange resize");
+	
+}
+
+$('#sidemenu').scroll(function(){
+	console.log("scroll_side");
+	
+});
+
+function onSwipeLeft(){
+    console.log('left swipe');
+	
+}
+function onSwipeRight(){
+    console.log('right swipe');
+	
+}
+
+// 番号キーをクリック時
+$(document).on({'click': function(){
+/*	$("audio#play-" + String($(this).data('val')).trim()).get(0).play();*/
+	cd = String($('#enter').text()).trim() + String($(this).data('val')).trim();
+	if (cd.length <= 0)
+		cd = '&nbsp;';
+	if (cd.length > 4){
+		alert(sprintf("メニュー番号は%d桁で入力してください。", 4));
+		return false;
+	}
+	$('#enter').html(cd);
+	getMenuName();
+	return false;
+}},'li.num');
+
+// 取消キーをクリック時
+$(document).on({'click': function(){
+/*	$("audio#play-kome").get(0).play();*/
+/*	$('#enter').html('&nbsp;');
+	getMenuName();*/
+	return false;
+}},'li.clear');
+
+// 削除キーをクリック時
+$(document).on({'click': function(){
+/*	$("audio#play-sharp").get(0).play();*/
+	cd = String($('#enter').text()).trim();
+	cd = cd.slice(0, -1);
+	if (cd.length <= 0)
+		cd = '&nbsp;';
+	$('#enter').html(cd);
+	getMenuName();
+	$('#is_reorder').val('0');
+	return false;
+}},'li.del');
+
+function getMenuName(reorder=false){
+	find = false;
+	nm = '&nbsp;';
+	pr = 0;
+	ssid = String($('#session-id').val()).trim();
+	sid = String($('#shop-id').val()).trim();
+	tno = String($('#table-no').val()).trim();
+	lng = String($('#cur_lang').val()).trim();
+	num = Number(String($('#number').val()).trim());
+	cd = String($('#enter').text()).trim();
+	mc = '';
+	mn = '';
+	mi = 0;
+	mg = '';
+	pm = '';
+	nt = '';
+	al = false;
+	
+	if (cd.length != 4){
+		$('.menu>.command>.name').html(nm);
+		$('.menu>.logo').removeClass('hidden');
+		return;
+	}
+	
+	$.ajax({	
+		url:"./src/cmd/get_item.php",
+		type:"POST",
+		data:'sid=' + sid + '&tno=' + tno + '&lng=' + lng + '&id=' + cd + '&num=' + num + '&ssid=' + ssid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			switch(Number(data['item_data']['state'])){
+			case 0:
+				alert(sprintf('申し訳ございません。<br />%sは、<br />ただいま品切れしております。', data['item_data']['name']));
+				break;
+			case 1:
+				break;
+			case 2:
+			default:
+				chk = 0;
+				if(data['item_data']['popup'] != '') chk++;
+				if(data['item_data']['notice'] != '') chk++;
+				if(data['item_data']['arc_type'] > 0) chk++;
+				if(chk <= 1){
+					nm = data['item_data']['name'];
+					pr = data['item_data']['price'];
+					mc = data['item_data']['mod_id'];
+					mn = data['item_data']['mod_name'];
+					mi = data['item_data']['mod_ini_cnt'];
+					mg = data['item_data']['mod_guid'];
+					pm = data['item_data']['popup'];
+					nt = data['item_data']['notice'];
+					al = (data['alcohol_check'] == 1);
+					find = true;
+				}
+				else{
+					alert('データ設定エラーです。');
+				}
+				break;
+			}
+		}
+		else{
+			console.log('not find.');
+			if (cd.length == 4){
+				alert('この番号のメニューが見つかりません。<br />メニュー番号をお確かめください。');
+			}
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		alert('エラーです。<br />スタッフにご確認ください。');
+	}).always(function(){
+		$('.menu>.command>.name').html(nm);
+		$('.detail>.main>#code').val(cd);
+		$('.detail>.main>.name>dt').html(nm);
+		$('.detail>.main>.name>dd').html(pr.toLocaleString() + '円');
+		$('.detail>.main>.amount>li>#amount').val(1);
+		$('.detail>.mod>#mod_code').val(mc);
+		$('.detail>.mod>.name>dt').html(mn);
+		$('.detail>.mod>.amount>li>#mod_amount').val(mi);
+		if(mg!=""){
+			$('.detail>.mod>#guide>.msg-base>span').html(mg);
+			$('.detail>.mod>#guide').css({'display':'block'});
+		}
+		else{
+			$('.detail>.mod>#guide').css({'display':'none'});
+		}
+		if(mc=="")	$('.detail>.mod').css({'display':'none'});
+		else		$('.detail>.mod').css({'display':'block'});
+		
+		if (find){
+			$('.menu>.logo').addClass('hidden');
+			
+			if (reorder){
+				if (!$('.base').hasClass("detail")){
+					$('.base').addClass("detail");
+					$('h1').html('数量を選択してください');
+					if($('.detail>.mod>#guide').css('display') != "none"){
+						$('#notice-sound')[0].currentTime = 0;
+						$('#notice-sound')[0].play();
+					}
+				}
+			}
+			
+			if(nt != ''){
+				$('.notice-balloon').removeClass('show');
+				$('.notice-balloon span').html(nt);
+				ds = 5;
+				tp = $('#body-section>div.menu>div.code').offset().top - $('#body-section').offset().top - ds;
+				lt = $('#body-section>div.menu>div.code').offset().left - $('#body-section').offset().left - ds;
+				wd = $('#body-section>div.menu>div.code').width() - ds * 2;
+				hg = $('#body-section>div.menu>div.code').height() + Number($('#body-section>div.menu>div.code').css('margin-bottom').replace('px', '')) + $('#body-section>div.menu>div.tenkey').height() - ds * 2;
+				console.log(tp+', '+lt+', '+wd+', '+hg);
+				$('.notice-balloon').css({'top':'calc(1.5vh + '+tp+'px)','left':'calc(1.5vh + '+lt+'px)','width':'calc(100vw - (1.5vh + '+lt+'px) * 2)','min-height':hg});
+				if($('.notice-balloon:not(.show)').length > 0){
+					setTimeout(function(){
+						$('.notice-balloon').addClass('show');
+						$('#notice-sound')[0].currentTime = 0;
+						$('#notice-sound')[0].play();
+					},100);
+				}
+			}
+			
+			if(pm != ''){
+				confirm(pm, function() {}, function() {
+					$('#enter').html('&nbsp;');
+					$('.menu>.logo').removeClass('hidden');
+				});
+			}
+			
+			if(al){
+				alcohol('アルコール販売についてのご確認', '20歳未満のお客様、およびお車や自転車などを運転されるお客様へのアルコール販売をお断りしております。', function() {
+					//console.log('ここで記録！');
+					$.ajax({	
+						url:"./src/cmd/put_alcohol.php",
+						type:"POST",
+						data:'sid=' + sid + '&tno=' + tno + '&ssid=' + ssid,
+						dataType:"json",
+						cache:false,
+						timespan:1000
+					}).done(function(data, textStatus, jqXHR){
+						console.log(data);
+					});
+				}, function() {
+					$('#enter').html('&nbsp;');
+					$('.menu>.logo').removeClass('hidden');
+				});
+			}
+		}
+		else{
+			$('.menu>.logo').removeClass('hidden');
+		}
+	});
+	
+}
+
+// 注文ボタンをクリック時
+$(document).on({'click': function(){
+	cd = String($('#enter').text()).trim();
+	if (cd.length <= 0){
+		alert('メニュー番号を入力してください。');
+		return false;
+	}
+	else if(cd.length != 4){
+		alert(sprintf('メニュー番号は%d桁で入力してください。', 4));
+		return false;
+	}
+	if (!$('.base').hasClass("detail")){
+		$('.base').addClass("detail");
+		$('h1').html('数量を選択してください');
+		if($('.detail>.mod>#guide').css('display') != "none"){
+			$('#notice-sound')[0].currentTime = 0;
+			$('#notice-sound')[0].play();
+		}
+	}
+	return false;
+}},'#order');
+
+// －ボタンをクリック時
+$(document).on({'click': function(){
+	if($(this).hasClass("disabled"))
+		return false;
+	ed = $(this).next().children('input');
+	amount = Number(ed.val());
+	amount--;
+	if($(this).parent().parent().hasClass('mod')){
+		if (amount < 0)
+			amount = 0;
+	}
+	else{
+		if (amount < 1)
+			amount = 1;
+	}
+	ed.val(amount);
+	return false;
+}},'#minus');
+
+// ＋ボタンをクリック時
+$(document).on({'click': function(){
+	if($(this).hasClass("disabled"))
+		return false;
+	ed = $(this).prev().children('input');
+	amount = Number(ed.val());
+	amount++;
+	if (amount > 99)
+		amount = 99;
+	ed.val(amount);
+	return false;
+}},'#plus');
+
+// もどるボタンをクリック時
+$(document).on({'click': function(){
+	if($('#sub_ctrl').val() == 'add_drink'){
+		$('#proc').val('top');
+		$('#frm_ctrl').submit();
+	}
+	else{
+		if ($('.base').hasClass("detail")){
+			$('.base').removeClass("detail");
+			$('h1').html('メニューブックから番号を入力してください');
+		}
+	}
+	return false;
+}},'#back');
+
+// 確定キーをクリック時
+$(document).on({'click': function(){
+	cd = String($('#enter').text()).trim();
+	if(cd.length != 4){
+		alert(sprintf('メニュー番号は%d桁で入力してください。', 4));
+		$('.base').removeClass("detail");
+		$('h1').html('メニューブックから番号を入力してください');
+		return false;
+	}
+	if($('#sub_ctrl').val() == 'add_drink'){
+		$('#proc').val('order');
+		$('#sub_ctrl').val('add_drink');
+		$('#ord-drkbar-cnt').val(Number($('#amount').val()));
+		$('#frm_ctrl').submit();
+	}
+	else{
+		var now = new Date();
+		var y = now.getFullYear();
+		var m = now.getMonth() + 1;
+		var d = now.getDate();
+		var h = now.getHours();
+		var mi = now.getMinutes();
+		var s = now.getSeconds();
+		var mm = ('0' + m).slice(-2);
+		var dd = ('0' + d).slice(-2);
+		var hh = ('0' + h).slice(-2);
+		var mmi = ('0' + mi).slice(-2);
+		var ss = ('0' + s).slice(-2);
+		strOrderTime = y + '/' + mm + '/' + dd + ',' + hh + ':' + mmi + ':' + ss;
+		$('#proc').val('main');
+		$('#ctrl').val('add');
+		$('#order-time').val(strOrderTime);
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#deside');
+
+function getObjectHeight(obj){
+	if(!obj.length)
+		return 0;
+	return obj.height() + (Number(obj.css('padding-top').replace('px', '')) + Number(obj.css('padding-bottom').replace('px', ''))) + (Number(obj.css('margin-top').replace('px', '')) + Number(obj.css('margin-bottom').replace('px', ''))) + (Number(obj.css('border-top-width').replace('px', '')) + Number(obj.css('border-bottom-width').replace('px', '')));
+}
+</file>
+
+<file path="number.js">
+$(function(){
+	console.log("ready");
+	
+	//ボディの高さを調整
+	body = $('#footer').offset().top - ($('#header').offset().top + $('#header').height()) - (Number($('#body-section').css('padding-top').replace('px', '')) + Number($('#body-section').css('padding-bottom').replace('px', '')));
+	$('#body-section').height(body);
+	
+	//各プロシージャ呼出
+	if(typeof onReadyExpand == 'function')
+		onReadyExpand();
+	
+	// imgタグにtitleを追加する
+	$("img[alt],a[alt],div[alt],li[alt],area[alt]").each(function(){
+		var a=$(this).attr("alt");
+		if(a.length>0&&!$(this).attr("title")){
+			$(this).attr("title",a);
+		}
+	});
+});
+
+//メッセージボックス表示時のスクロール無効化
+function handleTouchMove(event) {
+	if(!isPinchZooming()){
+		event.preventDefault();
+	}
+}
+
+//ピンチズームされているかを調べる
+function isPinchZooming() {
+	if ('visualViewport' in window) {
+		return window.visualViewport.scale > 1
+	} else {
+		return document.documentElement.clientWidth > window.innerWidth
+	}
+}
+
+//スクロール制御
+var scrollPos = 0;
+function disableScroll(reset = true) {
+	if(reset){
+		scrollPos = $(window).scrollTop();
+		$('body').css({
+			'position': 'fixed',
+			'width': '100%',
+			'z-index': '1',
+			'top': -scrollPos
+		});
+	}
+	else{
+		$('body').css({
+			'position': 'relative',
+			'width': 'auto',
+			'top': 'auto'
+		});
+		$('html, body').scrollTop(scrollPos);
+	}
+}
+
+$(window).on('load', function(){
+	console.log("load");
+
+	//メッセージボックス定義
+	$.alert = function(message){
+		var dfd = $.Deferred();
+		// ダイアログを作成
+		var dlg = $("<div></div>").dialog({
+			modal: true,
+			width: '80vw',
+			position: {my: "center center", at: "center center", of: "#base-overlay"},
+			appendTo: "#base-overlay",
+			buttons: {
+				"OK": function(){
+					$(this).dialog("close");
+					dfd.resolve();
+				}
+			},
+			close: function() {
+				disableScroll(false);
+				//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+				$('#base-overlay').remove();
+			}
+		});
+		dlg.html(message);
+		return dfd.promise();
+	};
+
+	$.confirm = function(message, reverse){
+		var dfd = $.Deferred();
+		// ダイアログを作成
+		if(!reverse){
+			var dlg = $("<div></div>").dialog({
+				modal: true,
+				width: '80vw',
+				position: {my: "center center", at: "center center", of: "#base-overlay"},
+				appendTo: "#base-overlay",
+				buttons: {
+					"いいえ": function(event, ui){
+						$(this).dialog("close");
+						dfd.resolve("cancel");
+					},
+					"はい": function(){
+						$(this).dialog("close");
+						dfd.resolve("yes");
+					}
+				},
+				close: function() {
+					disableScroll(false);
+					//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+					$('#base-overlay').remove();
+				}
+			});
+		}
+		else{
+			var dlg = $("<div></div>").dialog({
+				modal: true,
+				width: '80vw',
+				position: {my: "center center", at: "center center", of: "#base-overlay"},
+				appendTo: "#base-overlay",
+				buttons: {
+					"はい": function(){
+						$(this).dialog("close");
+						dfd.resolve("yes");
+					},
+					"いいえ": function(event, ui){
+						$(this).dialog("close");
+						dfd.resolve("cancel");
+					}
+				},
+				close: function() {
+					disableScroll(false);
+					//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+					$('#base-overlay').remove();
+				}
+			});
+		}
+		dlg.html(message);
+		return dfd.promise();
+	};
+
+	window.old_alert = window.alert;
+	window.alert =  function(message, okCallback=function(){}){
+		if($('body').find('#base-overlay').length > 0)
+			return;
+		$('body').append('<div id="base-overlay" class="ui-widget-overlay ui-front" style="z-index: 9999998;"></div>');
+		disableScroll();
+		//document.addEventListener('touchmove', handleTouchMove, { passive: false });
+		$.alert(message)
+		.then(function(status){
+			okCallback();
+			disableScroll(false);
+			//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+			$('#base-overlay').remove();
+		});
+		//一番後ろのボタンにフォーカス
+		$('.ui-dialog-buttonset>button:last-child').focus();
+	}
+	window.old_confirm = window.confirm;
+	window.confirm =  function(message, okCallback, cancelCallback=function(){}, reverse=false){
+		if($('body').find('#base-overlay').length > 0)
+			return;
+		$('body').append('<div id="base-overlay" class="ui-widget-overlay ui-front" style="z-index: 9999998;"></div>');
+		disableScroll();
+		//document.addEventListener('touchmove', handleTouchMove, { passive: false });
+		$.confirm(message, reverse)
+		.then(function(status){
+			var ret = (status === "yes");
+			if(ret)
+				okCallback();
+			else
+				cancelCallback();
+			disableScroll(false);
+			//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+			$('#base-overlay').remove();
+		});
+		//一番後ろのボタンにフォーカス
+		$('.ui-dialog-buttonset>button:last-child').focus();
+	}
+
+	//タイトル点滅
+	$('div#header>h1').addClass('blinking');
+
+	//各プロシージャ呼出
+	if(typeof onLoadExpand == 'function')
+		onLoadExpand();
+
+	//メッセージがあれば表示（スクロール完成後に表示の為ディレイ処理）
+	if($('#message').val() != ''){
+		setTimeout(function(){
+			alert($('#message').val());
+			$('#message').val('');
+		},100);
+	}
+/*	if($('.notice-balloon:not(.show)').length > 0){
+		setTimeout(function(){
+			$('.notice-balloon').addClass('show');
+			$('#notice-sound')[0].currentTime = 0;
+			$('#notice-sound')[0].play();
+		},100);
+	}*/
+});
+
+$(window).on('orientationchange resize', function() {
+	console.log("orientationchange resize");
+	
+	//ボディの高さを調整
+	body = $('#footer').offset().top - ($('#header').offset().top + $('#header').height()) - (Number($('#body-section').css('padding-top').replace('px', '')) + Number($('#body-section').css('padding-bottom').replace('px', '')));
+	$('#body-section').height(body);
+	
+	//各プロシージャ呼出
+	if(typeof onResizeExpand == 'function')
+		onResizeExpand();
+});
+
+$(window).scroll(function(){
+	console.log("scroll");
+	
+	// 「ページトップへ」を表示
+	if($(this).scrollTop()>100){
+		$("#pagetop").fadeIn();
+	}else{
+		$("#pagetop").fadeOut();
+	}
+	
+	//各プロシージャ呼出
+	if(typeof onScrollExpand == 'function')
+		onScrollExpand();
+});
+        
+// 「ページトップへ」クリック時
+$(document).on({'click': function(){
+	$("body,html").animate({scrollTop:0},300);
+	return false;
+}},'#pagetop');
+
+// ヘッダー帯 クリック時
+$(document).on({'click': function(){
+	$('#proc').val('top');
+	$('#frm_ctrl').submit();
+	return false;
+}},'#header>h1');
+
+// スワイプ処理
+var sd, sx, sy, ey;
+$(window).on('touchstart', function(e){sx=e.originalEvent.touches[0].pageX;sy=e.originalEvent.touches[0].pageY;ey=e.originalEvent.touches[0].pageY;sd=''});
+$(window).on('touchmove', function(e){if(sx-e.originalEvent.touches[0].pageX>100){sd='L'}else if(sx-e.originalEvent.touches[0].pageX<-100){sd='R'};ey=e.originalEvent.touches[0].pageY});
+$(window).on('touchend', function(e){if($('#base-overlay').length) return; if(Math.abs(sy-ey)<25){if(sd=='R'){onSwipeRight()}else if(sd=='L'){onSwipeLeft()}}});
+
+// 注文追加クリック時
+$(document).on({'click': function(){
+	if ($(this).hasClass('disabled'))
+		return false;
+		
+	sid = String($('#shop-id').val()).trim();
+	$.ajax({	
+		url:"./src/cmd/check_lastorder.php",
+		type:"POST",
+		data:'sid=' + sid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('ラストオーダーの時間を過ぎている為、注文を送信できません。', function() {
+				$('#proc').val('account');
+				$('#ctrl').val('clear');
+				$('#frm_ctrl').submit();
+			});
+		}
+		else{
+			$('#proc').val('menu');
+			$('#frm_ctrl').submit();
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		$('#proc').val('menu');
+		$('#frm_ctrl').submit();
+	});
+	
+	return false;
+}},'#order-add');
+
+// 注文リストクリック時
+$(document).on({'click': function(){
+	if ($(this).hasClass('disabled'))
+		return false;
+		
+	sid = String($('#shop-id').val()).trim();
+	$.ajax({	
+		url:"./src/cmd/check_lastorder.php",
+		type:"POST",
+		data:'sid=' + sid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('ラストオーダーの時間を過ぎている為、注文を送信できません。', function() {
+				$('#proc').val('account');
+				$('#ctrl').val('clear');
+				$('#frm_ctrl').submit();
+			});
+		}
+		else{
+			$('#proc').val('main');
+			$('#frm_ctrl').submit();
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		$('#proc').val('main');
+		$('#frm_ctrl').submit();
+	});
+	
+	return false;
+}},'#order-list');
+
+// 注文履歴クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('history');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#order-history');
+
+// 店員呼出クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('call');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#after-call');
+
+// 会計クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('account');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#do-account');
+
+// バルーンクリック時
+$(document).on({'click': function(){
+	$(this).parent().parent().removeClass('show');
+	return false;
+}},'.notice-balloon .ui-dialog-buttonset button');
+
+function onReadyExpand(){
+	console.log("ready");
+	
+}
+
+function onLoadExpand(){
+	console.log("load");
+	
+}
+
+function onScrollExpand(){
+	console.log("scroll");
+	
+}
+
+function onResizeExpand() {
+	console.log("orientationchange resize");
+	
+}
+
+$('#sidemenu').scroll(function(){
+	console.log("scroll_side");
+	
+});
+
+function onSwipeLeft(){
+    console.log('left swipe');
+	
+}
+function onSwipeRight(){
+    console.log('right swipe');
+	
+}
+
+// 「○人以上」クリック時
+$(document).on({'click': function(){
+	//idから値を取得
+	num = parseInt($(this).attr('id').substr(2));
+	
+	//値をチェック
+	if (num < 1 || 8 < num){
+		alert("正しい人数を選択してください。");
+		return false;
+	}
+	
+	//最終確認
+	confirm(sprintf('%d名様でご利用ですね？', num), function() {
+		//値をセットする
+		$('#number').val(num);
+		
+		$('#proc').val('menu');
+		$('#ctrl').val('number');
+		$('#frm_ctrl').submit();
+	});
+	
+	return false;
+}},'.btn.num:not(.ent)');
+
+// 「9人以上」クリック時
+$(document).on({'click': function(){
+	if (!$('.number').hasClass("enter")){
+		$('.number').addClass("enter")
+	}
+	return false;
+}},'.btn.num.ent');
+
+// 「戻る」クリック時
+$(document).on({'click': function(){
+	if ($('.number').hasClass("enter")){
+		$('.number').removeClass("enter")
+	}
+	return false;
+}},'#back');
+
+// 「確定」クリック時
+$(document).on({'click': function(){
+	//入力ボックスから値を取得
+	num = parseInt($('#nox').val());
+	
+	//入力ボックスの値をチェック
+	if (isNaN(num) || num < 1 || 99 < num){
+		alert("1～99人で入力してください。");
+		$('#nox').focus().get(0).select();
+		return false;
+	}
+	
+	//最終確認
+	confirm(sprintf('%d名様でご利用ですね？', num), function() {
+		//値をセットする
+		$('#number').val(num);
+		
+		$('#proc').val('menu');
+		$('#ctrl').val('number');
+		$('#frm_ctrl').submit();
+	});
+	
+	return false;
+}},'#decide');
+</file>
+
+<file path="top.js">
+$(function(){
+	console.log("ready");
+	
+	//ボディの高さを調整
+	body = $('#footer').offset().top - ($('#header').offset().top + $('#header').height()) - (Number($('#body-section').css('padding-top').replace('px', '')) + Number($('#body-section').css('padding-bottom').replace('px', '')));
+	$('#body-section').height(body);
+	
+	//各プロシージャ呼出
+	if(typeof onReadyExpand == 'function')
+		onReadyExpand();
+	
+	// imgタグにtitleを追加する
+	$("img[alt],a[alt],div[alt],li[alt],area[alt]").each(function(){
+		var a=$(this).attr("alt");
+		if(a.length>0&&!$(this).attr("title")){
+			$(this).attr("title",a);
+		}
+	});
+});
+
+//メッセージボックス表示時のスクロール無効化
+function handleTouchMove(event) {
+	if(!isPinchZooming()){
+		event.preventDefault();
+	}
+}
+
+//ピンチズームされているかを調べる
+function isPinchZooming() {
+	if ('visualViewport' in window) {
+		return window.visualViewport.scale > 1
+	} else {
+		return document.documentElement.clientWidth > window.innerWidth
+	}
+}
+
+//スクロール制御
+var scrollPos = 0;
+function disableScroll(reset = true) {
+	if(reset){
+		scrollPos = $(window).scrollTop();
+		$('body').css({
+			'position': 'fixed',
+			'width': '100%',
+			'z-index': '1',
+			'top': -scrollPos
+		});
+	}
+	else{
+		$('body').css({
+			'position': 'relative',
+			'width': 'auto',
+			'top': 'auto'
+		});
+		$('html, body').scrollTop(scrollPos);
+	}
+}
+
+$(window).on('load', function(){
+	console.log("load");
+
+	//メッセージボックス定義
+	$.alert = function(message){
+		var dfd = $.Deferred();
+		// ダイアログを作成
+		var dlg = $("<div></div>").dialog({
+			modal: true,
+			width: '80vw',
+			position: {my: "center center", at: "center center", of: "#base-overlay"},
+			appendTo: "#base-overlay",
+			buttons: {
+				"OK": function(){
+					$(this).dialog("close");
+					dfd.resolve();
+				}
+			},
+			close: function() {
+				disableScroll(false);
+				//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+				$('#base-overlay').remove();
+			}
+		});
+		dlg.html(message);
+		return dfd.promise();
+	};
+
+	$.confirm = function(message, reverse){
+		var dfd = $.Deferred();
+		// ダイアログを作成
+		if(!reverse){
+			var dlg = $("<div></div>").dialog({
+				modal: true,
+				width: '80vw',
+				position: {my: "center center", at: "center center", of: "#base-overlay"},
+				appendTo: "#base-overlay",
+				buttons: {
+					"いいえ": function(event, ui){
+						$(this).dialog("close");
+						dfd.resolve("cancel");
+					},
+					"はい": function(){
+						$(this).dialog("close");
+						dfd.resolve("yes");
+					}
+				},
+				close: function() {
+					disableScroll(false);
+					//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+					$('#base-overlay').remove();
+				}
+			});
+		}
+		else{
+			var dlg = $("<div></div>").dialog({
+				modal: true,
+				width: '80vw',
+				position: {my: "center center", at: "center center", of: "#base-overlay"},
+				appendTo: "#base-overlay",
+				buttons: {
+					"はい": function(){
+						$(this).dialog("close");
+						dfd.resolve("yes");
+					},
+					"いいえ": function(event, ui){
+						$(this).dialog("close");
+						dfd.resolve("cancel");
+					}
+				},
+				close: function() {
+					disableScroll(false);
+					//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+					$('#base-overlay').remove();
+				}
+			});
+		}
+		dlg.html(message);
+		return dfd.promise();
+	};
+
+	window.old_alert = window.alert;
+	window.alert =  function(message, okCallback=function(){}){
+		if($('body').find('#base-overlay').length > 0)
+			return;
+		$('body').append('<div id="base-overlay" class="ui-widget-overlay ui-front" style="z-index: 9999998;"></div>');
+		disableScroll();
+		//document.addEventListener('touchmove', handleTouchMove, { passive: false });
+		$.alert(message)
+		.then(function(status){
+			okCallback();
+			disableScroll(false);
+			//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+			$('#base-overlay').remove();
+		});
+		//一番後ろのボタンにフォーカス
+		$('.ui-dialog-buttonset>button:last-child').focus();
+	}
+	window.old_confirm = window.confirm;
+	window.confirm =  function(message, okCallback, cancelCallback=function(){}, reverse=false){
+		if($('body').find('#base-overlay').length > 0)
+			return;
+		$('body').append('<div id="base-overlay" class="ui-widget-overlay ui-front" style="z-index: 9999998;"></div>');
+		disableScroll();
+		//document.addEventListener('touchmove', handleTouchMove, { passive: false });
+		$.confirm(message, reverse)
+		.then(function(status){
+			var ret = (status === "yes");
+			if(ret)
+				okCallback();
+			else
+				cancelCallback();
+			disableScroll(false);
+			//document.removeEventListener('touchmove', handleTouchMove, { passive: false });
+			$('#base-overlay').remove();
+		});
+		//一番後ろのボタンにフォーカス
+		$('.ui-dialog-buttonset>button:last-child').focus();
+	}
+
+	//タイトル点滅
+	$('div#header>h1').addClass('blinking');
+
+	//各プロシージャ呼出
+	if(typeof onLoadExpand == 'function')
+		onLoadExpand();
+
+	//メッセージがあれば表示（スクロール完成後に表示の為ディレイ処理）
+	if($('#message').val() != ''){
+		setTimeout(function(){
+			alert($('#message').val());
+			$('#message').val('');
+		},100);
+	}
+/*	if($('.notice-balloon:not(.show)').length > 0){
+		setTimeout(function(){
+			$('.notice-balloon').addClass('show');
+			$('#notice-sound')[0].currentTime = 0;
+			$('#notice-sound')[0].play();
+		},100);
+	}*/
+});
+
+$(window).on('orientationchange resize', function() {
+	console.log("orientationchange resize");
+	
+	//ボディの高さを調整
+	body = $('#footer').offset().top - ($('#header').offset().top + $('#header').height()) - (Number($('#body-section').css('padding-top').replace('px', '')) + Number($('#body-section').css('padding-bottom').replace('px', '')));
+	$('#body-section').height(body);
+	
+	//各プロシージャ呼出
+	if(typeof onResizeExpand == 'function')
+		onResizeExpand();
+});
+
+$(window).scroll(function(){
+	console.log("scroll");
+	
+	// 「ページトップへ」を表示
+	if($(this).scrollTop()>100){
+		$("#pagetop").fadeIn();
+	}else{
+		$("#pagetop").fadeOut();
+	}
+	
+	//各プロシージャ呼出
+	if(typeof onScrollExpand == 'function')
+		onScrollExpand();
+});
+        
+// 「ページトップへ」クリック時
+$(document).on({'click': function(){
+	$("body,html").animate({scrollTop:0},300);
+	return false;
+}},'#pagetop');
+
+// ヘッダー帯 クリック時
+$(document).on({'click': function(){
+	$('#proc').val('top');
+	$('#frm_ctrl').submit();
+	return false;
+}},'#header>h1');
+
+// スワイプ処理
+var sd, sx, sy, ey;
+$(window).on('touchstart', function(e){sx=e.originalEvent.touches[0].pageX;sy=e.originalEvent.touches[0].pageY;ey=e.originalEvent.touches[0].pageY;sd=''});
+$(window).on('touchmove', function(e){if(sx-e.originalEvent.touches[0].pageX>100){sd='L'}else if(sx-e.originalEvent.touches[0].pageX<-100){sd='R'};ey=e.originalEvent.touches[0].pageY});
+$(window).on('touchend', function(e){if($('#base-overlay').length) return; if(Math.abs(sy-ey)<25){if(sd=='R'){onSwipeRight()}else if(sd=='L'){onSwipeLeft()}}});
+
+// 注文追加クリック時
+$(document).on({'click': function(){
+	if ($(this).hasClass('disabled'))
+		return false;
+		
+	sid = String($('#shop-id').val()).trim();
+	$.ajax({	
+		url:"./src/cmd/check_lastorder.php",
+		type:"POST",
+		data:'sid=' + sid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('ラストオーダーの時間を過ぎている為、注文を送信できません。', function() {
+				$('#proc').val('account');
+				$('#ctrl').val('clear');
+				$('#frm_ctrl').submit();
+			});
+		}
+		else{
+			$('#proc').val('menu');
+			$('#frm_ctrl').submit();
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		$('#proc').val('menu');
+		$('#frm_ctrl').submit();
+	});
+	
+	return false;
+}},'#order-add');
+
+// 注文リストクリック時
+$(document).on({'click': function(){
+	if ($(this).hasClass('disabled'))
+		return false;
+		
+	sid = String($('#shop-id').val()).trim();
+	$.ajax({	
+		url:"./src/cmd/check_lastorder.php",
+		type:"POST",
+		data:'sid=' + sid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('ラストオーダーの時間を過ぎている為、注文を送信できません。', function() {
+				$('#proc').val('account');
+				$('#ctrl').val('clear');
+				$('#frm_ctrl').submit();
+			});
+		}
+		else{
+			$('#proc').val('main');
+			$('#frm_ctrl').submit();
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		$('#proc').val('main');
+		$('#frm_ctrl').submit();
+	});
+	
+	return false;
+}},'#order-list');
+
+// 注文履歴クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('history');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#order-history');
+
+// 店員呼出クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('call');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#after-call');
+
+// 会計クリック時
+$(document).on({'click': function(){
+	if (!$(this).hasClass('disabled')){
+		$('#proc').val('account');
+		$('#frm_ctrl').submit();
+	}
+	return false;
+}},'#do-account');
+
+// バルーンクリック時
+$(document).on({'click': function(){
+	$(this).parent().parent().removeClass('show');
+	return false;
+}},'.notice-balloon .ui-dialog-buttonset button');
+
+function onReadyExpand(){
+	console.log("ready");
+	
+}
+
+function onLoadExpand(){
+	console.log("load");
+	
+	//タイトル点滅止め
+	$('div#header>h1').removeClass('blinking');
+	
+	sid = String($('#shop-id').val()).trim();
+	tno = String($('#table-no').val()).trim();
+	
+	$.ajax({	
+		url:"./src/cmd/check_order.php",
+		type:"POST",
+		data:'sid=' + sid + '&tno=' + tno,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK')		$('body').removeClass('start');
+		else							$('body').addClass('start');
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+	}).always(function(){
+		//ボディの高さを調整
+		body = $('#footer').offset().top - ($('#header').offset().top + $('#header').height()) - (Number($('#body-section').css('padding-top').replace('px', '')) + Number($('#body-section').css('padding-bottom').replace('px', '')));
+		$('#body-section').height(body);
+	});
+}
+
+function onScrollExpand(){
+	console.log("scroll");
+	
+}
+
+function onResizeExpand() {
+	console.log("orientationchange resize");
+	
+}
+
+$('#sidemenu').scroll(function(){
+	console.log("scroll_side");
+	
+});
+
+function onSwipeLeft(){
+    console.log('left swipe');
+	
+}
+function onSwipeRight(){
+    console.log('right swipe');
+	
+}
+
+// 言語選択のクリック時
+$(document).on({'click': function(){
+	if ($(this).hasClass('opened'))
+		$(this).removeClass('opened');
+	else
+		$(this).addClass('opened');
+	return false;
+}},'.global');
+
+// 言語選択の切り替え時
+$(document).on({'click': function(){
+	$('#cur_lang').val($(this).data('lang-id'));
+	$('#frm_ctrl').submit();
+	return false;
+}},'#language>li');
+
+// 「追加オーダー」クリック時
+$(document).on({'click': function(){
+	sid = String($('#shop-id').val()).trim();
+	$.ajax({	
+		url:"./src/cmd/check_lastorder.php",
+		type:"POST",
+		data:'sid=' + sid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('ラストオーダーの時間を過ぎている為、注文を送信できません。', function() {
+				$('#proc').val('account');
+				$('#ctrl').val('clear');
+				$('#frm_ctrl').submit();
+			});
+		}
+		else{
+			clickStart();
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		clickStart();
+	});
+	return false;
+}},'#order');
+
+function clickStart(){
+	$.ajax({	
+		url:"./src/cmd/check_midnight.php",
+		type:"POST",
+		data:'sid=' + sid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('夜10:00以降は、お食事代の10%を深夜料金として加算させていただきます。', function() {
+				$('#proc').val('number');
+				$('#frm_ctrl').submit();
+			});
+		}
+		else{
+			$('#proc').val('number');
+			$('#frm_ctrl').submit();
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		$('#proc').val('number');
+		$('#frm_ctrl').submit();
+	});
+}
+
+// 「人数を修正する」クリック時
+$(document).on({'click': function(){
+	sid = String($('#shop-id').val()).trim();
+	$.ajax({	
+		url:"./src/cmd/check_lastorder.php",
+		type:"POST",
+		data:'sid=' + sid,
+		dataType:"json",
+		cache:false,
+		timespan:1000
+	}).done(function(data, textStatus, jqXHR){
+		console.log(data);
+		if (data['result'] == 'OK'){
+			alert('ラストオーダーの時間を過ぎている為、注文を送信できません。', function() {
+				$('#proc').val('account');
+				$('#ctrl').val('clear');
+				$('#frm_ctrl').submit();
+			});
+		}
+		else{
+			$('#proc').val('number');
+			$('#ctrl').val('forced');
+			$('#frm_ctrl').submit();
+		}
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		console.log('error');
+		$('#proc').val('number');
+		$('#ctrl').val('forced');
+		$('#frm_ctrl').submit();
+	});
+	return false;
+}},'#number');
+</file>
+
+</files>
