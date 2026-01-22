@@ -1,0 +1,18 @@
+{
+  "name": "saizeriya-server",
+  "private": true,
+  "scripts": {
+    "dev": "bun --watch src/main.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "hono": "^4.11.3",
+    "node-console-progress-bar-tqdm": "^1.0.4",
+    "p-limit": "^7.2.0"
+  }
+}
