@@ -2,7 +2,8 @@
   "name": "saizeriya",
   "private": true,
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ],
   "scripts": {
     "dev": "bun --cwd apps/server --watch src/main.ts"
