@@ -1,19 +1,16 @@
 {
   "name": "saizeriya",
   "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
-    "dev": "bun --watch src/main.ts"
+    "dev": "bun --cwd apps/server --watch src/main.ts"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.10",
-    "@types/bun": "latest"
+    "@biomejs/biome": "^2.3.10"
   },
   "peerDependencies": {
     "typescript": "^5"
-  },
-  "dependencies": {
-    "hono": "^4.11.3",
-    "node-console-progress-bar-tqdm": "^1.0.4",
-    "p-limit": "^7.2.0"
   }
 }

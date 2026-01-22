@@ -1,15 +1,22 @@
 # saizeriya
 
-To install dependencies:
+This repository is a Bun monorepo. The pseudo server lives in `apps/server`.
+
+## Install dependencies
 
 ```bash
 bun install
 ```
 
-To run:
+## Run the pseudo server
 
 ```bash
-bun run 
+bun run dev
 ```
 
-This project was created using `bun init` in bun v1.3.5. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+Or, from the app directory:
+
+```bash
+cd apps/server
+bun run dev
+```

@@ -9,9 +9,9 @@
 		"ignoreUnknown": false,
 		"includes": [
 			"**/*",
-			"!assets",
-			"!dynamic-assets",
-			"!raw-html"
+			"!apps/server/assets",
+			"!apps/server/dynamic-assets",
+			"!apps/server/raw-html"
 		]
 	},
 	"formatter": {
