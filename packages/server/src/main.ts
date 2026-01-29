@@ -6,7 +6,11 @@ import { History } from './template/History'
 import { Menu } from './template/Menu'
 import { Account } from './template/Account'
 import { Call } from './template/Call'
+import { html } from 'hono/html'
 
+const urlIds = new Map<string, Page>()
+
+type Page = 'history' | 'main' | 'top' | 'number' | 'menu' | 'call' | 'account'
 interface Data {
   proc: 'history' | 'main' | 'top' | 'number' | 'menu'
   ctrl: 'remember'
@@ -20,16 +24,26 @@ interface Data {
   token: '6954a6a3c646a5.93625306'
 }
 const saizeriyaApp = new Hono()
+  .get('/qr', (c) => {
+    const id = crypto.randomUUID()
+    urlIds.set(id, 'top')
+    return c.redirect(`./?${id}`)
+  })
   .all('/', async (c) => {
     const search = new URL(c.req.url).search.slice(1)
     let data: Data | undefined
-    if (c.req.header('Content-Type') === 'application/x-www-form-urlencoded') {
+    if (c.req.header('Content-Type')?.startsWith('application/x-www-form-urlencoded')) {
       data = Object.fromEntries(
         (await c.req.formData()).entries(),
       ) as unknown as Data
     }
 
-    const next = data?.proc ?? 'top'
+    if (!urlIds.has(search)) {
+      const next = data?.proc ?? 'top'
+      urlIds.set(search, next)
+    }
+    const next = urlIds.get(search) || 'top'
+    console.log(search)
 
     if (next === 'number') {
       return c.html(PeopleNumber())

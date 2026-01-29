@@ -1,5 +1,7 @@
+/** @jsx react-jsx */
+/** @jsxImportSource hono/jsx */
 export const Call = () => (
-  <html lang="ja" itemscope="" itemtype="http://schema.org/WebPage">
+  <html lang="ja" itemscope itemtype="http://schema.org/WebPage">
     <head>
       {/*
 Array
@@ -163,7 +165,7 @@ SESSION ID: ct9l2l29bk60na8pecl32os72b
           <form
             id="frm_ctrl"
             class="call-page"
-            action="./?d22fd056b6bd7886d578c9683620e8c6"
+            action={`./?${crypto.randomUUID()}`}
             method="post"
           >
             <input type="hidden" id="proc" name="proc" value="call" />

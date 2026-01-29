@@ -2,10 +2,11 @@
   "name": "saizeriya",
   "private": true,
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ],
   "scripts": {
-    "dev": "bun --cwd apps/server --watch src/main.ts"
+    "dev": "bun --cwd packages/server --watch src/main.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.10"

@@ -1,8 +1,11 @@
 {
-  "name": "saizeriya-server",
+  "name": "@repo/saizeriya-server",
   "private": true,
   "scripts": {
     "dev": "bun --watch src/main.ts"
+  },
+  "exports": {
+    ".": "./src/main.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"

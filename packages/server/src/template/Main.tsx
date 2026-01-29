@@ -1,20 +1,25 @@
-export const Menu = () => (
+/** @jsx react-jsx */
+/** @jsxImportSource hono/jsx */
+export const Main = () => (
   <html lang="ja" itemscope itemtype="http://schema.org/WebPage">
     <head>
       {/*
 Array
 (
-    [e6b4683750293b863378f96340bc9d8e] => 
-    [proc] => history
-    [ctrl] => remember
+    [877f5caba385e424e3411ac87134f8bd] => 
+    [proc] => main
+    [ctrl] => 
     [sub_ctrl] => 
     [cur_lang] => 1
     [message] => 
-    [code] => 
-    [drinkbar-cnt] => 0
-    [alcohol-cnt] => 0
     [ord-drkbar-cnt] => 0
-    [token] => 6954a6a3c646a5.93625306
+    [is_reorder] => 0
+    [order-time] => 
+    [token] => 6954a673b87de4.98894231
+    [code] => 
+    [amount] => 1
+    [mod_code] => 
+    [mod_amount] => 1
 )
 Array
 (
@@ -102,7 +107,8 @@ SESSION ID: ct9l2l29bk60na8pecl32os72b
         src="https://www.googletagmanager.com/gtag/js?id=G-K1X5L7LJ8F"
       ></script>
       <script>
-        {` window.dataLayer = window.dataLayer || [];
+        {`
+    window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'G-K1X5L7LJ8F');`}
@@ -137,17 +143,17 @@ SESSION ID: ct9l2l29bk60na8pecl32os72b
       <link
         rel="stylesheet"
         type="text/css"
-        href="./src/page/css/base.css.php?SN=525&amp;LG=1&amp;DD=6954a6cb59831"
+        href="./src/page/css/base.css.php?SN=525&amp;LG=1&amp;DD=6954a6a3c6446"
       />
       <link
         rel="stylesheet"
         type="text/css"
-        href="./src/page/css/history.css?DD=6954a6cb59832"
+        href="./src/page/css/main.css?DD=6954a6a3c6447"
       />
       <link
         rel="stylesheet"
         type="text/css"
-        href="./data/common/1/custom.css?DD=6954a6cb5983b"
+        href="./data/common/1/custom.css?DD=6954a6a3c645e"
       />
       <meta name="theme-color" content="#ffffff" />
       <meta
@@ -162,37 +168,58 @@ SESSION ID: ct9l2l29bk60na8pecl32os72b
         <div class="inner-wrap portrait">
           <form
             id="frm_ctrl"
-            class="history-page"
-            action="./?1958bdd8f97a9fef12944a356d074fd3"
+            class="main-page"
+            action={`./?${crypto.randomUUID()}`}
             method="post"
           >
-            <input type="hidden" id="proc" name="proc" value="history" />
-            <input type="hidden" id="ctrl" name="ctrl" value="" />
+            <input type="hidden" id="proc" name="proc" value="main" />
+            <input type="hidden" id="ctrl" name="ctrl" value="remember" />
             <input type="hidden" id="sub_ctrl" name="sub_ctrl" value="" />
-            <input type="hidden" id="cur_lang" name="cur_lang" value="1" />
-            <input type="hidden" id="message" name="message" value="" />
-            <div id="header" class="float-clear">
-              <h1 class="blinking">注文内容をご確認ください</h1>
-            </div>{' '}
-            <input type="hidden" id="shop-id" value="525" />
-            <input type="hidden" id="code" name="code" value="" />
-            <div id="body-section" style="height: 772.345px;">
-              <div class="list-base" style="height: 629.227px;">
-                <ul class="header">
-                  <li>メニュー名</li>
-                  <li>数量</li>
-                  <li>価格</li>
-                  <li>&nbsp;</li>
-                </ul>
-                <div class="list" style="height: 577.311px;">
-                  <table>
-                    <tbody> このページをアーカイブし忘れた！！！！！</tbody>
-                  </table>
-                </div>
-              </div>
 
-              <div class="message">
-                注文の反映には数分かかることがございます
+            <input type="hidden" id="cur_lang" name="cur_lang" value="1" />
+
+            <input type="hidden" id="message" name="message" value="" />
+
+            <div id="header" class="float-clear">
+              <h1 class="blinking">
+                他に注文があれば「追加」、なければ「注文」
+              </h1>
+            </div>
+            <input type="hidden" id="code" name="code" value="" />
+
+            <input type="hidden" id="shop-id" value="525" />
+            <input type="hidden" id="number" value="2" />
+            <input
+              type="hidden"
+              id="drinkbar-cnt"
+              name="drinkbar-cnt"
+              value="0"
+            />
+            <input
+              type="hidden"
+              id="alcohol-cnt"
+              name="alcohol-cnt"
+              value="0"
+            />
+            <input
+              type="hidden"
+              id="ord-drkbar-cnt"
+              name="ord-drkbar-cnt"
+              value="0"
+            />
+            <input type="hidden" id="is-first-order" value="YES" />
+
+            <div id="body-section" style="height: 772.345px;">
+              <input
+                type="hidden"
+                id="token"
+                name="token"
+                value="6954a6a3c646a5.93625306"
+              />
+              <div class="list" style="height: 574.109px;">
+                <table>
+                  <tbody></tbody>
+                </table>
               </div>
 
               <div class="amount">
@@ -203,24 +230,34 @@ SESSION ID: ct9l2l29bk60na8pecl32os72b
                   合計&nbsp;<span>0</span>円 (税込)
                 </p>
               </div>
+
+              <div class="command">
+                <div id="menu" class="btn green">
+                  追　加
+                </div>
+                <div id="order" class="btn red">
+                  注　文
+                </div>
+              </div>
             </div>
+
             <div id="footer">
               <ul id="menu">
-                <li id="order-add">
+                <li id="order-add" class="disabled">
                   <p>
                     注文
                     <br />
                     追加
                   </p>
                 </li>
-                <li id="order-list">
+                <li id="order-list" class="disabled selected">
                   <p>
                     注文
                     <br />
                     かご
                   </p>
                 </li>
-                <li id="order-history" class="disabled selected">
+                <li id="order-history">
                   <p>
                     注文
                     <br />
@@ -234,7 +271,7 @@ SESSION ID: ct9l2l29bk60na8pecl32os72b
                     呼出
                   </p>
                 </li>
-                <li id="do-account">
+                <li id="do-account" class="disabled">
                   <p>
                     会計
                     <br />
@@ -254,6 +291,7 @@ SESSION ID: ct9l2l29bk60na8pecl32os72b
         </div>
       </div>
       {/* off-canvas-wrap */}
+
       <script
         type="text/javascript"
         src="//ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"
@@ -262,13 +300,15 @@ SESSION ID: ct9l2l29bk60na8pecl32os72b
         type="text/javascript"
         src="//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"
       ></script>
+
       <script
         type="text/javascript"
         src="//cdnjs.cloudflare.com/ajax/libs/sprintf/1.1.2/sprintf.min.js"
       ></script>
+
       <script
         type="text/javascript"
-        src="./src/page/js/base.js.php?JS=history.js.php&amp;SN=525&amp;LG=1&amp;DD=6954a6cb5987e"
+        src="./src/page/js/base.js.php?JS=main.js.php&amp;SN=525&amp;LG=1&amp;DD=6954a6a3c6495"
       ></script>
     </body>
   </html>

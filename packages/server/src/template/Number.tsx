@@ -1,10 +1,17 @@
-export const Top = () => (
+/** @jsx react-jsx */
+/** @jsxImportSource hono/jsx */
+export const PeopleNumber = () => (
   <html lang="ja" itemscope itemtype="http://schema.org/WebPage">
     <head>
       {/*
 Array
 (
-    [09cfab0e94e69f0c260117329865632d] => 
+    [9d8fec9cf95b89c8630f1f6bcab7e8a9] => 
+    [proc] => number
+    [ctrl] => forced
+    [sub_ctrl] => 
+    [cur_lang] => 1
+    [message] => 
 )
 Array
 (
@@ -17,7 +24,7 @@ Array
     [table_no] => 51
     [sheet_no] => 0
     [control_no] => 03953459
-    [dummy_no] => 639a027817313561759
+    [dummy_no] => 639027817313561759
     [cart] => Array
         (
         )
@@ -60,7 +67,7 @@ Array
     [init_lang_id] => 1
     [use_call] => 1
 )
-ROOT_PATH:      /home/pointsoft3/www/saizeriya3gv
+ROOT_PATH:      /home/pointsoft3/www/saizeriya3
 CMN_ROOT_PATH: /home/pointsoft3/www/saizeriya3
 SESSION ID: ct9l2l29bk60na8pecl32os72b
 */}
@@ -131,17 +138,17 @@ SESSION ID: ct9l2l29bk60na8pecl32os72b
       <link
         rel="stylesheet"
         type="text/css"
-        href="./src/page/css/base.css.php?SN=525&amp;LG=1&amp;DD=6954a4f111b06"
+        href="./src/page/css/base.css.php?SN=525&amp;LG=1&amp;DD=6954a6454af22"
       />
       <link
         rel="stylesheet"
         type="text/css"
-        href="./src/page/css/top.css?DD=6954a4f111b07"
+        href="./src/page/css/number.css?DD=6954a6454af23"
       />
       <link
         rel="stylesheet"
         type="text/css"
-        href="./data/common/1/custom.css?DD=6954a4f111b11"
+        href="./data/common/1/custom.css?DD=6954a6454af2f"
       />
       <meta name="theme-color" content="#ffffff" />
       <meta
@@ -157,55 +164,84 @@ SESSION ID: ct9l2l29bk60na8pecl32os72b
         <div class="inner-wrap portrait">
           <form
             id="frm_ctrl"
-            class="top-page"
-            action="./?number"
+            class="number-page"
+            action={`./?${crypto.randomUUID()}`}
             method="post"
           >
-            <input type="hidden" id="proc" name="proc" value="top" />
+            <input type="hidden" id="proc" name="proc" value="number" />
             <input type="hidden" id="ctrl" name="ctrl" value="" />
             <input type="hidden" id="sub_ctrl" name="sub_ctrl" value="" />
 
             <input type="hidden" id="cur_lang" name="cur_lang" value="1" />
-
             <input type="hidden" id="message" name="message" value="" />
 
             <div id="header" class="float-clear">
-              <h1 class="">いらっしゃいませ</h1>
+              <h1 class="blinking">何名様(全員)でご利用ですか？</h1>
             </div>
             <input type="hidden" id="shop-id" value="525" />
-            <input type="hidden" id="table-no" value="51" />
 
             <div id="body-section" style="height: 772.345px">
-              <div class="global">
-                <ul class="language" id="language" name="language">
-                  <li data-lang-id="1" class="selected">
-                    日本語
+              <input
+                type="hidden"
+                id="token"
+                name="token"
+                value="6954a6454af3b5.29350776"
+              />
+              <input type="hidden" id="number" name="number" value="" />
+              <div class="number">
+                <ul class="select">
+                  <li id="no1" class="btn white num">
+                    <p>1 人</p>
                   </li>
-                  <li data-lang-id="2">English</li>
-                  <li data-lang-id="3">中文</li>
+                  <li id="no2" class="btn white num">
+                    <p>2 人</p>
+                  </li>
+                  <li id="no3" class="btn white num">
+                    <p>3 人</p>
+                  </li>
+                  <li id="no4" class="btn white num">
+                    <p>4 人</p>
+                  </li>
+                  <li id="no5" class="btn white num">
+                    <p>5 人</p>
+                  </li>
+                  <li id="no6" class="btn white num">
+                    <p>6 人</p>
+                  </li>
+                  <li id="no7" class="btn white num">
+                    <p>7 人</p>
+                  </li>
+                  <li id="no8" class="btn white num">
+                    <p>8 人</p>
+                  </li>
+                  <li class="btn white num ent">
+                    <p>
+                      9人
+                      <br />
+                      以上
+                    </p>
+                  </li>
                 </ul>
-              </div>
 
-              <div class="logo">
-                <img
-                  src="./data/525/img/logo.png"
-                  alt="イタリアンワイン＆カフェレストラン サイゼリヤ"
-                  title="イタリアンワイン＆カフェレストラン サイゼリヤ"
-                />
-
-                {/*p>※複数のスマホで注文された場合、<br />　会計伝票が１つにまとまります。</p*/}
-                <div id="order" class="btn red">
-                  注文をはじめる
-                </div>
-                <div id="number" class="btn text">
-                  テーブル51　2名様
+                <div class="enter">
+                  <p>人数を入力してください。</p>
+                  <input id="nox" type="number" maxlength={2} value="9" />
+                  <span>人</span>
+                  <ul>
+                    <li id="back" class="btn green">
+                      もどる
+                    </li>
+                    <li id="decide" class="btn red">
+                      確　定
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
 
             <div id="footer">
               <ul id="menu">
-                <li id="order-add">
+                <li id="order-add" class="disabled">
                   <p>
                     注文
                     <br />
@@ -219,21 +255,21 @@ SESSION ID: ct9l2l29bk60na8pecl32os72b
                     かご
                   </p>
                 </li>
-                <li id="order-history">
+                <li id="order-history" class="disabled">
                   <p>
                     注文
                     <br />
                     履歴
                   </p>
                 </li>
-                <li id="after-call">
+                <li id="after-call" class="disabled">
                   <p>
                     店員
                     <br />
                     呼出
                   </p>
                 </li>
-                <li id="do-account">
+                <li id="do-account" class="disabled">
                   <p>
                     会計
                     <br />
@@ -270,7 +306,7 @@ SESSION ID: ct9l2l29bk60na8pecl32os72b
 
       <script
         type="text/javascript"
-        src="./src/page/js/base.js.php?JS=top.js.php&amp;SN=525&amp;LG=1&amp;DD=6954a4f111ba7"
+        src="./src/page/js/base.js.php?JS=number.js.php&amp;SN=525&amp;LG=1&amp;DD=6954a6454af74"
       ></script>
     </body>
   </html>

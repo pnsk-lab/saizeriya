@@ -1,16 +1,22 @@
-export const Account = () => (
+/** @jsx react-jsx */
+/** @jsxImportSource hono/jsx */
+export const Menu = () => (
   <html lang="ja" itemscope itemtype="http://schema.org/WebPage">
     <head>
       {/*
 Array
 (
-    [d22fd056b6bd7886d578c9683620e8c6] => 
-    [proc] => account
-    [ctrl] => 
+    [e6b4683750293b863378f96340bc9d8e] => 
+    [proc] => history
+    [ctrl] => remember
     [sub_ctrl] => 
     [cur_lang] => 1
     [message] => 
-    [token] => 6954a7346d8ce2.61897369
+    [code] => 
+    [drinkbar-cnt] => 0
+    [alcohol-cnt] => 0
+    [ord-drkbar-cnt] => 0
+    [token] => 6954a6a3c646a5.93625306
 )
 Array
 (
@@ -133,17 +139,17 @@ SESSION ID: ct9l2l29bk60na8pecl32os72b
       <link
         rel="stylesheet"
         type="text/css"
-        href="./src/page/css/base.css.php?SN=525&amp;LG=1&amp;DD=6954a7576e2d8"
+        href="./src/page/css/base.css.php?SN=525&amp;LG=1&amp;DD=6954a6cb59831"
       />
       <link
         rel="stylesheet"
         type="text/css"
-        href="./src/page/css/account.css?DD=6954a7576e2db"
+        href="./src/page/css/history.css?DD=6954a6cb59832"
       />
       <link
         rel="stylesheet"
         type="text/css"
-        href="./data/common/1/custom.css?DD=6954a7576e2e9"
+        href="./data/common/1/custom.css?DD=6954a6cb5983b"
       />
       <meta name="theme-color" content="#ffffff" />
       <meta
@@ -158,84 +164,46 @@ SESSION ID: ct9l2l29bk60na8pecl32os72b
         <div class="inner-wrap portrait">
           <form
             id="frm_ctrl"
-            class="account-page"
-            action="./?cb0e5609e190c922c369702fe05a4f0e"
+            class="history-page"
+            action={`./?${crypto.randomUUID()}`}
             method="post"
           >
-            <input type="hidden" id="proc" name="proc" value="account" />
+            <input type="hidden" id="proc" name="proc" value="history" />
             <input type="hidden" id="ctrl" name="ctrl" value="" />
             <input type="hidden" id="sub_ctrl" name="sub_ctrl" value="" />
             <input type="hidden" id="cur_lang" name="cur_lang" value="1" />
             <input type="hidden" id="message" name="message" value="" />
             <div id="header" class="float-clear">
-              <h1 class="blinking">お帰りの際は[お会計する]をタップ</h1>
+              <h1 class="blinking">注文内容をご確認ください</h1>
             </div>{' '}
             <input type="hidden" id="shop-id" value="525" />
-            <input type="hidden" id="table-no" value="51" />
+            <input type="hidden" id="code" name="code" value="" />
             <div id="body-section" style="height: 772.345px;">
-              <div class="list-base" style="height: 574.109px;">
+              <div class="list-base" style="height: 629.227px;">
                 <ul class="header">
                   <li>メニュー名</li>
                   <li>数量</li>
                   <li>価格</li>
+                  <li>&nbsp;</li>
                 </ul>
-                <div class="list" style="height: 522.199px;">
+                <div class="list" style="height: 577.311px;">
                   <table>
-                    <tbody>
-                      {' '}
-                      <tr>
-                        <td>ﾐｰﾄｿｰｽﾎﾞﾛﾆｱ風</td>
-                        <td>1</td>
-                        <td>400</td>
-                      </tr>{' '}
-                      <tr>
-                        <td>ｶﾙﾎﾞﾅｰﾗ</td>
-                        <td>1</td>
-                        <td>500</td>
-                      </tr>{' '}
-                      <tr>
-                        <td>半熟卵のｶﾙﾎﾞﾅｰﾗ</td>
-                        <td>1</td>
-                        <td>550</td>
-                      </tr>{' '}
-                      <tr>
-                        <td>ﾗｰｼﾞﾗｲｽ</td>
-                        <td>1</td>
-                        <td>200</td>
-                      </tr>{' '}
-                      <tr>
-                        <td>ﾃﾞｨｱﾎﾞﾗ風ﾊﾝﾊﾞｰｸﾞ</td>
-                        <td>1</td>
-                        <td>500</td>
-                      </tr>{' '}
-                      <tr>
-                        <td>ほうれん草のｿﾃｰ</td>
-                        <td>1</td>
-                        <td>200</td>
-                      </tr>{' '}
-                      <tr>
-                        <td>ｽｰﾌﾟ入り塩味ﾎﾞﾝｺﾞﾚ</td>
-                        <td>1</td>
-                        <td>500</td>
-                      </tr>{' '}
-                    </tbody>
+                    <tbody> このページをアーカイブし忘れた！！！！！</tbody>
                   </table>
                 </div>
               </div>
 
-              <div class="amount" style="margin-bottom: 1.5vh;">
-                <p class="count">
-                  <span>7</span>点
-                </p>
-                <p class="amount">
-                  合計&nbsp;<span>2,850</span>円 (税込)
-                </p>
+              <div class="message">
+                注文の反映には数分かかることがございます
               </div>
 
-              <div class="command">
-                <div id="decide" class="btn red">
-                  お会計する
-                </div>
+              <div class="amount">
+                <p class="count">
+                  <span>0</span>点
+                </p>
+                <p class="amount">
+                  合計&nbsp;<span>0</span>円 (税込)
+                </p>
               </div>
             </div>
             <div id="footer">
@@ -254,7 +222,7 @@ SESSION ID: ct9l2l29bk60na8pecl32os72b
                     かご
                   </p>
                 </li>
-                <li id="order-history">
+                <li id="order-history" class="disabled selected">
                   <p>
                     注文
                     <br />
@@ -268,13 +236,12 @@ SESSION ID: ct9l2l29bk60na8pecl32os72b
                     呼出
                   </p>
                 </li>
-                <li id="do-account" class="disabled selected">
+                <li id="do-account">
                   <p>
                     会計
                     <br />
                     する
                   </p>
-                  <span class="find">!</span>
                 </li>
               </ul>
               <p id="copy">©2023 Saizeriya Co,. Ltd. All rights reserved.</p>
@@ -289,7 +256,6 @@ SESSION ID: ct9l2l29bk60na8pecl32os72b
         </div>
       </div>
       {/* off-canvas-wrap */}
-
       <script
         type="text/javascript"
         src="//ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"
@@ -298,15 +264,13 @@ SESSION ID: ct9l2l29bk60na8pecl32os72b
         type="text/javascript"
         src="//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"
       ></script>
-
       <script
         type="text/javascript"
         src="//cdnjs.cloudflare.com/ajax/libs/sprintf/1.1.2/sprintf.min.js"
       ></script>
-
       <script
         type="text/javascript"
-        src="./src/page/js/base.js.php?JS=account.js.php&amp;SN=525&amp;LG=1&amp;DD=6954a7576e3a9"
+        src="./src/page/js/base.js.php?JS=history.js.php&amp;SN=525&amp;LG=1&amp;DD=6954a6cb5987e"
       ></script>
     </body>
   </html>

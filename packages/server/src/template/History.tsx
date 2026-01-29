@@ -1,3 +1,5 @@
+/** @jsx react-jsx */
+/** @jsxImportSource hono/jsx */
 export const History = () => <html lang="ja" itemscope itemtype="http://schema.org/WebPage"><head>
 {/*
 Array
@@ -115,7 +117,7 @@ SESSION ID: ct9l2l29bk60na8pecl32os72b
 
   <div class="off-canvas-wrap">
     <div class="inner-wrap portrait">
-      <form id="frm_ctrl" class="history-page" action="./?1958bdd8f97a9fef12944a356d074fd3" method="post">
+      <form id="frm_ctrl" class="history-page" action={`./?${crypto.randomUUID()}`} method="post">
         <input type="hidden" id="proc" name="proc" value="history" />
         <input type="hidden" id="ctrl" name="ctrl" value="" />
         <input type="hidden" id="sub_ctrl" name="sub_ctrl" value="" />
