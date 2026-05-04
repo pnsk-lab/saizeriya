@@ -1070,6 +1070,8 @@ const SHOPS = [
   '99999',
 ].map((id) => id.replace(/^0+/, ''))
 
+console.warn('⚠️ This script is not intended to be run to completion ⚠️')
+
 const FETCH_URL = 'https://ioes.saizeriya.co.jp/saizeriya2/src/cmd/get_item.php'
 const OUTPUT_PATH = './data/menu-by-shop.json'
 const ITEM_CODE_COUNT = 10000

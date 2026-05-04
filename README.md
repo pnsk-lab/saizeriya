@@ -59,8 +59,9 @@ cd apps/betterzeriya
 bun dev
 ```
 
+### Usage
 
-### Run with Docker
+#### Run with Docker
 
 ```bash
 docker pull ghcr.io/pnsk-lab/betterzeriya:latest
@@ -84,11 +85,22 @@ docker stop betterzeriya
 Use a different host port by changing the left side of `-p`. For example,
 `-p 8080:3000` serves the app at `http://localhost:8080`.
 
-### Run locally
+### Run manually
 
 ```bash
+bun i
 cd apps/betterzeriya
-bun dev
+bun run build
+bun vp preview
+```
+
+### Deploy to Cloudflare
+
+```bash
+bun i
+cd apps/betterzeriya
+CLOUDFLARE=1 bun run build
+wrangler deploy
 ```
 
 
