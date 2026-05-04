@@ -1,351 +1,151 @@
 /** @jsx react-jsx */
 /** @jsxImportSource hono/jsx */
+import { BrandLogo, Shell } from './shared'
+
 export const Menu = () => (
-  <html lang="ja" itemscope itemtype="http://schema.org/WebPage">
-    <head>
-      {/*
-Array
-(
-    [e6b4683750293b863378f96340bc9d8e] => 
-    [proc] => menu
-    [ctrl] => number
-    [sub_ctrl] => 
-    [cur_lang] => 1
-    [message] => 
-    [code] => 
-    [drinkbar-cnt] => 0
-    [alcohol-cnt] => 0
-    [ord-drkbar-cnt] => 0
-    [token] => 6954a6a3c646a5.93625306
-)
-Array
-(
-)
-Array
-(
-    [shop_no] => 525
-    [terminal_no] => 9
-    [zone_no] => 1
-    [table_no] => 51
-    [sheet_no] => 0
-    [control_no] => 03953459
-    [dummy_no] => 639027817313561759
-    [cart] => Array
-        (
-        )
-
-    [cur_lang] => 1
-    [number] => 2
-)
-Array
-(
-    [ID1] => Array
-        (
-            [lang_id] => 1
-            [lang_name] => 日本語
-            [lang_code] => ja
-        )
-
-    [ID2] => Array
-        (
-            [lang_id] => 2
-            [lang_name] => English
-            [lang_code] => en
-        )
-
-    [ID3] => Array
-        (
-            [lang_id] => 3
-            [lang_name] => 中文
-            [lang_code] => zh
-        )
-
-)
-Array
-(
-    [customer_id] => 1
-    [shop_id] => 525
-    [customer_name] => Saizeriya Co,. Ltd.
-    [shop_name] => サイゼリヤ
-    [shop_tel] => 
-    [master_ver] => 1
-    [init_lang_id] => 1
-    [use_call] => 1
-)
-ROOT_PATH:      /home/pointsoft3/www/saizeriya3
-CMN_ROOT_PATH: /home/pointsoft3/www/saizeriya3
-SESSION ID: ct9l2l29bk60na8pecl32os72b
-*/}
-      <meta charset="UTF-8" />
-      <title>株式会社サイゼリヤ モバイルオーダーシステム</title>
-      <meta name="viewport" content="width=device-width" />
-      <meta name="color-scheme" content="light" />
-      {/* テーマカラー */}
-      <meta name="theme-color" content="#219228" />
-      {/* テーマカラー　モード指定 */}
-      <meta
-        name="theme-color"
-        media="(prefers-color-scheme: light)"
-        content="#219228"
-      />
-      <meta
-        name="theme-color"
-        media="(prefers-color-scheme: dark)"
-        content="#219228"
-      />
-      <meta http-equiv="Cache-Control" content="no-cache" />
-      <meta name="description" content="" />
-      <meta http-equiv="Content-Language" content="ja" />
-      <meta name="google" content="notranslate" />
-      <link rel="shortcut icon" href="./data/525/img/favicon.ico" />
-      {/* Google tag (gtag.js) */}
-      <script
-        async
-        src="https://www.googletagmanager.com/gtag/js?id=G-K1X5L7LJ8F"
-      ></script>
-      <script>
-        {` window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-K1X5L7LJ8F');`}
-      </script>{' '}
-      <link rel="preconnect" href="https://fonts.gstatic.com" />
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&amp;display=swap&amp;text=0123456789,."
-      />
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&amp;display=swap"
-      />
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=M+PLUS+1:wght@100;200;300;400;500;600;700;800;900&amp;display=swap"
-      />
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Murecho:wght@100;200;300;400;500;600;700;800;900&amp;display=swap"
-      />
-      <link
-        rel="stylesheet"
-        type="text/css"
-        href="//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css"
-      />
-      <link
-        rel="stylesheet"
-        type="text/css"
-        href="./src/page/css/foundation.min.css"
-      />
-      <link
-        rel="stylesheet"
-        type="text/css"
-        href="./src/page/css/base.css.php?SN=525&amp;LG=1&amp;DD=6954a673b87c4"
-      />
-      <link
-        rel="stylesheet"
-        type="text/css"
-        href="./src/page/css/menu.css?DD=6954a673b87c5"
-      />
-      <link
-        rel="stylesheet"
-        type="text/css"
-        href="./data/common/1/custom.css?DD=6954a6cb5983b"
-      />
-      <meta name="theme-color" content="#ffffff" />
-      <meta
-        name="format-detection"
-        content="telephone=no,address=no,email=no"
-      />
-      <meta name="ROBOTS" content="NOINDEX,NOFOLLOW" />
-    </head>
-
-    <body>
-      <div class="off-canvas-wrap">
-        <div class="inner-wrap portrait">
-          <form
-            id="frm_ctrl"
-            class="menu-page"
-            action={`./?${crypto.randomUUID()}`}
-            method="post"
-          >
-            <input type="hidden" id="proc" name="proc" value="menu" />
-            <input type="hidden" id="ctrl" name="ctrl" value="number" />
-            <input type="hidden" id="sub_ctrl" name="sub_ctrl" value="" />
-            <input type="hidden" id="cur_lang" name="cur_lang" value="1" />
-            <input type="hidden" id="message" name="message" value="" />
-            <div id="header" class="float-clear">
-              <h1 class="blinking">メニューブックから番号を入力してください</h1>
-            </div>
-            <input type="hidden" id="shop-id" value="525" />
-            <input type="hidden" id="table-no" value="51" />
-            <input type="hidden" id="session-id" value="ct9l2l29bk60na8pecl32os72b" />
-            <input type="hidden" id="number" value="2" />
-            <input type="hidden" id="drinkbar-cnt" name="drinkbar-cnt" value="0" />
-            <input type="hidden" id="alcohol-cnt" name="alcohol-cnt" value="0" />
-            <input type="hidden" id="ord-drkbar-cnt" name="ord-drkbar-cnt" value="0" />
-            <input type="hidden" id="is_reorder" name="is_reorder" value="0" />
-            <input type="hidden" id="order-time" name="order-time" value="" />
-            <input
-              type="hidden"
-              id="token"
-              name="token"
-              value="6954a673b87de4.98894231"
-            />
-
-            <div id="body-section" class="base">
-              <div class="menu">
-                <div class="command">
-                  <div class="name">&nbsp;</div>
-                  <div id="order" class="btn red">注文</div>
-                </div>
-                <div class="logo">
-                  <img src="./data/525/img/logo-mini.png" alt="Saizeriya" />
-                </div>
-                <div class="code">
-                  <p id="enter">&nbsp;</p>
-                </div>
-                <div class="tenkey">
-                  <ul>
-                    <li class="btn gray" data-val="1">1</li>
-                    <li class="btn gray" data-val="2">2</li>
-                    <li class="btn gray" data-val="3">3</li>
-                    <li class="btn gray" data-val="4">4</li>
-                    <li class="btn gray" data-val="5">5</li>
-                    <li class="btn gray" data-val="6">6</li>
-                    <li class="btn gray" data-val="7">7</li>
-                    <li class="btn gray" data-val="8">8</li>
-                    <li class="btn gray" data-val="9">9</li>
-                    <li class="clear">&nbsp;</li>
-                    <li class="btn gray" data-val="0">0</li>
-                    <li class="btn green del">削除</li>
-                  </ul>
-                </div>
-                <div class="notice-balloon">
-                  <div class="balloon-arrow"></div>
-                  <div class="msg-base">
-                    <img src="./src/page/img/info.svg" alt="" />
-                    <span></span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="detail">
-                <div class="main">
-                  <input type="hidden" id="code" name="code" value="" />
-                  <dl class="name">
-                    <dt>&nbsp;</dt>
-                    <dd>0円</dd>
-                  </dl>
-                  <ul class="amount">
-                    <li class="cmd" id="minus">－</li>
-                    <li>
-                      <input id="amount" name="amount" type="number" value="1" readonly />
-                    </li>
-                    <li class="cmd" id="plus">＋</li>
-                  </ul>
-                </div>
-                <div class="mod" style="display: none;">
-                  <input type="hidden" id="mod_code" name="mod_code" value="" />
-                  <dl class="name">
-                    <dt>&nbsp;</dt>
-                    <dd></dd>
-                  </dl>
-                  <ul class="amount">
-                    <li class="cmd" id="minus">－</li>
-                    <li>
-                      <input
-                        id="mod_amount"
-                        name="mod_amount"
-                        type="number"
-                        value="0"
-                        readonly
-                      />
-                    </li>
-                    <li class="cmd" id="plus">＋</li>
-                  </ul>
-                  <div id="guide" style="display: none;">
-                    <div class="balloon-arrow"></div>
-                    <div class="msg-base">
-                      <img src="./src/page/img/info.svg" alt="" />
-                      <span></span>
-                    </div>
-                  </div>
-                </div>
-                <div class="command">
-                  <div id="back" class="btn gray">もどる</div>
-                  <div id="deside" class="btn red">確定</div>
-                </div>
-              </div>
-            </div>
-            <audio id="notice-sound" preload="auto">
-              <source src="./src/page/sound/notice.wav" type="audio/wav" />
-            </audio>
-            <div id="footer">
-              <ul id="menu">
-                <li id="order-add" class="disabled selected">
-                  <p>
-                    注文
-                    <br />
-                    追加
-                  </p>
-                </li>
-                <li id="order-list">
-                  <p>
-                    注文
-                    <br />
-                    かご
-                  </p>
-                </li>
-                <li id="order-history">
-                  <p>
-                    注文
-                    <br />
-                    履歴
-                  </p>
-                </li>
-                <li id="after-call">
-                  <p>
-                    店員
-                    <br />
-                    呼出
-                  </p>
-                </li>
-                <li id="do-account">
-                  <p>
-                    会計
-                    <br />
-                    する
-                  </p>
-                </li>
-              </ul>
-              <p id="copy">©2023 Saizeriya Co,. Ltd. All rights reserved.</p>
-            </div>
-          </form>
+  <Shell
+    page="menu"
+    title="メニューブックから番号を入力してください"
+    ctrl="number"
+  >
+    <input type="hidden" id="drinkbar-cnt" name="drinkbar-cnt" value="0" />
+    <input type="hidden" id="alcohol-cnt" name="alcohol-cnt" value="0" />
+    <input type="hidden" id="ord-drkbar-cnt" name="ord-drkbar-cnt" value="0" />
+    <input type="hidden" id="is_reorder" name="is_reorder" value="0" />
+    <input type="hidden" id="order-time" name="order-time" value="" />
+    <div id="body-section" class="base">
+      <div class="menu">
+        <div class="command">
+          <div class="name">&nbsp;</div>
+          <div id="order" class="btn red">
+            注文
+          </div>
         </div>
-        {/* inner-wrap */}
-        <div class="inner-wrap landscape">
-          <div id="caution-section">
-            <p>画面を縦にしてご利用ください。</p>
+        <div class="logo">
+          <BrandLogo compact />
+        </div>
+        <div class="code">
+          <p id="enter">&nbsp;</p>
+        </div>
+        <div class="tenkey">
+          <ul>
+            <li class="btn gray" data-val="1">
+              1
+            </li>
+            <li class="btn gray" data-val="2">
+              2
+            </li>
+            <li class="btn gray" data-val="3">
+              3
+            </li>
+            <li class="btn gray" data-val="4">
+              4
+            </li>
+            <li class="btn gray" data-val="5">
+              5
+            </li>
+            <li class="btn gray" data-val="6">
+              6
+            </li>
+            <li class="btn gray" data-val="7">
+              7
+            </li>
+            <li class="btn gray" data-val="8">
+              8
+            </li>
+            <li class="btn gray" data-val="9">
+              9
+            </li>
+            <li class="clear">&nbsp;</li>
+            <li class="btn gray" data-val="0">
+              0
+            </li>
+            <li class="btn green del">削除</li>
+          </ul>
+        </div>
+        <div class="notice-balloon">
+          <div class="balloon-arrow"></div>
+          <div class="msg-base">
+            <span>メニューブックの番号を入力してください。</span>
           </div>
         </div>
       </div>
-      {/* off-canvas-wrap */}
-      <script
-        type="text/javascript"
-        src="//ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"
-      ></script>
-      <script
-        type="text/javascript"
-        src="//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"
-      ></script>
-      <script
-        type="text/javascript"
-        src="//cdnjs.cloudflare.com/ajax/libs/sprintf/1.1.2/sprintf.min.js"
-      ></script>
-      <script
-        type="text/javascript"
-        src="./src/page/js/base.js.php?JS=menu.js.php&amp;SN=525&amp;LG=1&amp;DD=6954a673b8841c"
-      ></script>
-    </body>
-  </html>
+      <div class="detail">
+        <div class="main">
+          <input type="hidden" id="code" name="code" value="" />
+          <dl class="name">
+            <dt>&nbsp;</dt>
+            <dd>0円</dd>
+          </dl>
+          <ul class="amount">
+            <li class="cmd" id="minus">
+              -
+            </li>
+            <li>
+              <input
+                id="amount"
+                name="amount"
+                type="number"
+                value="1"
+                readonly
+              />
+            </li>
+            <li class="cmd" id="plus">
+              +
+            </li>
+          </ul>
+        </div>
+        <div class="mod" style="display: none;">
+          <input type="hidden" id="mod_code" name="mod_code" value="" />
+          <dl class="name">
+            <dt>&nbsp;</dt>
+            <dd></dd>
+          </dl>
+          <ul class="amount">
+            <li class="cmd" id="minus">
+              -
+            </li>
+            <li>
+              <input
+                id="mod_amount"
+                name="mod_amount"
+                type="number"
+                value="0"
+                readonly
+              />
+            </li>
+            <li class="cmd" id="plus">
+              +
+            </li>
+          </ul>
+          <div id="guide" style="display: none;">
+            <div class="balloon-arrow"></div>
+            <div class="msg-base">
+              <span></span>
+            </div>
+          </div>
+        </div>
+        <div class="command">
+          <button
+            type="submit"
+            name="proc"
+            value="menu"
+            id="back"
+            class="btn gray"
+          >
+            もどる
+          </button>
+          <button
+            type="submit"
+            name="proc"
+            value="main"
+            id="deside"
+            class="btn red"
+          >
+            確 定
+          </button>
+        </div>
+      </div>
+    </div>
+  </Shell>
 )

@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import menuData from './data/menu.json'
 import { Account } from './template/Account'
 import { Call } from './template/Call'
 import { History } from './template/History'
@@ -7,7 +8,6 @@ import { Menu } from './template/Menu'
 import { PeopleNumber } from './template/Number'
 import { Receipt } from './template/Receipt'
 import { Top } from './template/Top'
-import menuData from './data/menu.json'
 
 export type Page =
   | 'history'
@@ -85,6 +85,9 @@ interface OrderDisplayLine {
   name: string
   count: number
   price: number
+  modId: string
+  modCount: number
+  reorder: 0 | 1
 }
 
 export interface TableState {
@@ -108,7 +111,9 @@ export interface ServerOptions {
   menuItems?: MenuItem[]
 }
 
-const defaultMenuItems: MenuItem[] = (menuData as (MenuSeedItem | FetchedMenuItem)[])
+const defaultMenuItems: MenuItem[] = (
+  menuData as (MenuSeedItem | FetchedMenuItem)[]
+)
   .map((item) => {
     if ('item_data' in item && item.item_data) {
       return {
@@ -118,7 +123,7 @@ const defaultMenuItems: MenuItem[] = (menuData as (MenuSeedItem | FetchedMenuIte
     }
 
     if (!('code' in item)) {
-      return
+      return null
     }
 
     return {
@@ -142,8 +147,6 @@ const cloneCart = (cart: CartLine[]) => cart.map((item) => ({ ...item }))
 
 const assetFile = (path: string) =>
   Bun.file(new URL(`../assets/${path}`, import.meta.url))
-const dynamicAssetFile = (path: string) =>
-  Bun.file(new URL(`../dynamic-assets/${path}`, import.meta.url))
 
 const pageComponents = {
   account: Account,
@@ -451,17 +454,6 @@ export class Server {
           },
         })
       })
-      .get('/src/page/js/base.js.php', async (c) => {
-        const jsName = c.req.query('JS')
-        if (!jsName || jsName.includes('..')) {
-          return c.text('Invalid JS parameter', 400)
-        }
-        const file = dynamicAssetFile(`js/${jsName.replace('.php', '')}`)
-        if (!(await file.exists())) {
-          return c.text('File not found', 404)
-        }
-        return c.body(file.stream())
-      })
       .get('/data/:path{.+}', async (c) => {
         const path = c.req.param('path')
         if (path.includes('..')) {
@@ -472,25 +464,6 @@ export class Server {
           return c.text('File not found', 404)
         }
         return c.body(file.stream())
-      })
-      .get('/src/:path{.+}', async (c) => {
-        const path = c.req.param('path')
-        if (path.includes('..')) {
-          return c.text('Invalid path', 400)
-        }
-        const file = assetFile(`src/${path}`)
-        if (await file.exists()) {
-          return c.body(file.stream())
-        }
-        const fileNoPhp = assetFile(
-          `src/${path}`
-            .replace(/\.js.php$/, '.js.php.js')
-            .replace(/\.css.php$/, '.css.php.css'),
-        )
-        if (!(await fileNoPhp.exists())) {
-          return c.text('File not found', 404)
-        }
-        return c.body(fileNoPhp.stream())
       })
   }
 
@@ -568,7 +541,8 @@ export class Server {
       return
     }
 
-    const submitted = order ?? cloneCart(table.state.cart)
+    const submitted =
+      order && order.length > 0 ? order : cloneCart(table.state.cart)
     if (submitted.length > 0) {
       table.state.submittedOrders.push(submitted)
     }
@@ -627,6 +601,9 @@ export class Server {
     if (rewritten.includes('history-page')) {
       rewritten = this.#rewriteOrderList(rewritten, table, 'history')
     }
+    if (rewritten.includes('main-page')) {
+      rewritten = this.#rewriteMainCart(rewritten, table)
+    }
     if (rewritten.includes('account-page')) {
       rewritten = this.#rewriteOrderList(rewritten, table, 'account')
     }
@@ -649,10 +626,10 @@ export class Server {
       .padStart(3, '0')}${control}`.slice(0, 12)
   }
 
-  #getSubmittedOrderLines(table: Table) {
+  #buildOrderDisplayLines(items: CartLine[]) {
     const lines = new Map<string, OrderDisplayLine>()
 
-    for (const item of table.state.submittedOrders.flat()) {
+    for (const item of items) {
       const menuItem = this.menuItems.get(item.id)
       const modifier = item.modId ? this.menuItems.get(item.modId) : undefined
       const modCount =
@@ -676,6 +653,9 @@ export class Server {
           name,
           count: item.count,
           price: unitPrice * item.count,
+          modId: item.modId,
+          modCount,
+          reorder: item.reorder,
         })
       }
     }
@@ -683,11 +663,51 @@ export class Server {
     return [...lines.values()]
   }
 
-  #rewriteOrderList(
-    html: string,
-    table: Table,
-    page: 'account' | 'history',
-  ) {
+  #getSubmittedOrderLines(table: Table) {
+    return this.#buildOrderDisplayLines(table.state.submittedOrders.flat())
+  }
+
+  #getCartOrderLines(table: Table) {
+    return this.#buildOrderDisplayLines(table.state.cart)
+  }
+
+  #rewriteMainCart(html: string, table: Table) {
+    const lines = this.#getCartOrderLines(table)
+    const count = lines.reduce((sum, line) => sum + line.count, 0)
+    const total = lines.reduce((sum, line) => sum + line.price, 0)
+    const rows = lines
+      .map(
+        (line) =>
+          `<tr><td>${escapeHTML(line.name)}</td><td>${escapeHTML(line.count)}</td><td>${escapeHTML(formatAmount(line.price))}</td></tr>`,
+      )
+      .join('')
+    const hiddenFields = table.state.cart
+      .map(
+        (item) =>
+          `<input type="hidden" name="item[id][]" value="${escapeHTML(item.id)}" /><input type="hidden" name="item[count][]" value="${escapeHTML(item.count)}" /><input type="hidden" name="item[reorder][]" value="${escapeHTML(item.reorder)}" /><input type="hidden" name="item[mod_id][]" value="${escapeHTML(item.modId)}" /><input type="hidden" name="item[mod_count][]" value="${escapeHTML(item.modCount)}" />`,
+      )
+      .join('')
+
+    return html
+      .replace(
+        /(<input type="hidden" id="is-first-order" value="YES" \/>)/,
+        `$1${hiddenFields}`,
+      )
+      .replace(
+        /(<div class="list-base"[^>]*>\s*<div class="list"[^>]*>\s*<table>\s*<tbody>)[\s\S]*?(<\/tbody>)/,
+        `$1${rows}$2`,
+      )
+      .replace(
+        /(<p class="count">\s*<span>)[\s\S]*?(<\/span>点<\/p>)/,
+        `$1${count}$2`,
+      )
+      .replace(
+        /(<p class="amount">[\s\S]*?合計(?:&nbsp;|\s|\u00a0)*<span>)[\s\S]*?(<\/span>\s*円 \(税込\)\s*<\/p>)/,
+        `$1${formatAmount(total)}$2`,
+      )
+  }
+
+  #rewriteOrderList(html: string, table: Table, page: 'account' | 'history') {
     const lines = this.#getSubmittedOrderLines(table)
     const count = lines.reduce((sum, line) => sum + line.count, 0)
     const total = lines.reduce((sum, line) => sum + line.price, 0)
