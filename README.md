@@ -8,6 +8,14 @@ This repository includes a saizeriya-compatible server, client library, and clie
 bun i
 ```
 
+### Docker-free
+
+```
+bun install
+bun run build # build packages/client & betterzeriya
+bun run start # node apps/betterzeriya/build
+```
+
 ## Compatible Server
 
 ```bash
