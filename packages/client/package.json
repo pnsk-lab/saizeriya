@@ -1,33 +1,22 @@
 {
-  "name": "saizeriya.js",
+  "name": "@orderlab/client",
   "version": "0.0.1",
-  "description": "A research client library and CLI for Saizeriya's mobile ordering flow.",
+  "description": "A research client library for QR-based restaurant ordering flows.",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/pnsk-lab/saizeriya.git",
-    "directory": "packages/client"
-  },
-  "bin": {
-    "saizeriya": "./dist/cli.mjs"
-  },
-  "files": [
-    "dist",
-    "README.md"
-  ],
   "type": "module",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.mts",
-      "import": "./dist/index.mjs"
+      "types": "./index.ts",
+      "import": "./index.ts"
     },
     "./package.json": "./package.json"
   },
-  "publishConfig": {
-    "access": "public"
-  },
+  "files": [
+    "index.ts",
+    "cli.ts",
+    "src",
+    "README.md"
+  ],
   "scripts": {
     "build": "vp pack index.ts cli.ts --dts --clean",
     "pack": "vp pack index.ts cli.ts --dts --clean",

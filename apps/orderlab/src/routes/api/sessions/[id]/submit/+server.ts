@@ -4,6 +4,7 @@ import {
   serializeState,
   submitOfficialCart,
 } from '$lib/server/official-client'
+import { dryRunEnabled } from '$lib/server/safety';
 
 export const POST: RequestHandler = async ({ params, request }) => {
   const body = await request.json().catch(() => ({}))
@@ -24,6 +25,14 @@ export const POST: RequestHandler = async ({ params, request }) => {
       return json({ error: 'Count must be between 1 and 99' }, { status: 400 })
     }
     normalizedCart.push({ id, count })
+  }
+
+  if (dryRunEnabled) {
+    return json({
+      dryRun: true,
+      message: 'Order submission is disabled in sandbox mode.',
+      cart: normalizedCart
+    });
   }
 
   try {

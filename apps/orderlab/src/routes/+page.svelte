@@ -287,8 +287,8 @@
 </script>
 
 <svelte:head>
-	<title>ご注文はこちら</title>
-	<meta name="description" content="サイゼリヤ公式モバイルオーダー互換クライアント" />
+	<title>OrderLab</title>
+	<meta name="description" content="QRベースの飲食店注文UIを検証するためのサンドボックス" />
 </svelte:head>
 
 <main class="scanner-page">
@@ -304,7 +304,7 @@
 		<button class="scanner-icon-button" aria-label="閉じる" onclick={stopScanner}>
 			<span class="i-tabler-x"></span>
 		</button>
-		<strong>ご注文はこちら</strong>
+		<strong>OrderLab</strong>
 		<button
 			class="scanner-icon-button right"
 			aria-label="カメラ切り替え"

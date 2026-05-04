@@ -1,30 +1,22 @@
 {
-  "name": "saizeriya",
+  "name": "orderlab",
   "private": true,
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
-  "type": "module",
   "scripts": {
-    "dev": "bun --cwd packages/server --watch src/main.ts",
-    "cli": "bun --cwd packages/client cli.ts",
-    "format": "vp fmt . --write",
-    "format:check": "vp fmt . --check",
-    "lint": "vp lint .",
-    "lint:fix": "vp lint . --fix",
-    "check": "vp check .",
-    "check:fix": "vp check --fix",
-    "test": "vp test",
-    "test:watch": "vp test watch"
-  },
-  "dependencies": {
-    "p-limit": "^7.3.0"
+    "dev": "bun run --cwd ./packages/server dev",
+    "app": "bun run --cwd ./apps/orderlab dev",
+    "cli": "bun --cwd ./apps/cli src/index.ts"
   },
   "devDependencies": {
-    "vite-plus": "^0.1.20"
+    "@biomejs/biome": "^2.3.10"
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "dependencies": {
+    "p-limit": "^7.3.0"
   }
 }

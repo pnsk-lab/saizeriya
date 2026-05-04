@@ -1,6 +1,14 @@
-# saizeriya
+# OrderLab
 
-This repository includes a saizeriya-compatible server, client library, and client app.
+OrderLab is a sandbox for experimenting with QR-based restaurant ordering UX, client libraries, and compatible mock servers.
+
+## Safety Notice
+
+This project is intended for local mock servers, UI experiments, and protocol research.
+
+Do not use this project to send orders, staff calls, checkout requests, or any other operational requests to real stores or third-party services.
+
+By default, access to official services and write operations should be disabled.
 
 ## Setup
 
@@ -8,7 +16,7 @@ This repository includes a saizeriya-compatible server, client library, and clie
 bun i
 ```
 
-## Compatible Server
+## Compatible Mock Server
 
 ```bash
 cd packages/server
@@ -17,36 +25,93 @@ bun dev
 
 You can see the dashboard at `/dashboard`.
 
+The mock server provides a local environment for testing QR-based ordering flows without sending requests to real stores or third-party services.
+
 ## Client Library
 
-A saizeriya client library written in JS/TS.
+A QR-based restaurant ordering client library written in JS/TS.
 
 ```bash
-bun add saizeriya.js
+cd packages/client
 ```
 
-And this includes CLI.
+Package name:
 
-```bash
-bunx saizeriya.js
-# or
-bun add -g saizeriya.js
-saizeriya --help
+```text
+@orderlab/client
 ```
 
-## Agent Skills
+## OrderLab App
+
+OrderLab App is a client app for experimenting with better ordering UX and performance.
 
 ```bash
-bunx skills add pnsk-lab/saizeriya/skills
-```
-
-With agent skills, you can order dishes with AI Agents such as Claude Code and Codex.
-
-## Betterzeriya: Client App
-
-Betterzeriya is a 3rd-party client for saizeriya, with better UX and performance.
-
-```bash
-cd apps/betterzeriya
+cd apps/orderlab
 bun dev
 ```
+
+## Development Policy
+
+OrderLab should prioritize safe local testing and mock-server compatibility.
+
+The default development flow should be:
+
+```text
+OrderLab App
+  ↓
+OrderLab Client Library
+  ↓
+Compatible Mock Server
+```
+
+Requests to real services should not be enabled by default.
+
+## Suggested Environment Variables
+
+```env
+BETTERZERIYA_ALLOW_OFFICIAL=false
+BETTERZERIYA_DRY_RUN=true
+```
+
+Recommended behavior:
+
+- `BETTERZERIYA_ALLOW_OFFICIAL=false`
+  - Blocks official-service session creation.
+- `BETTERZERIYA_DRY_RUN=true`
+  - Prevents write operations such as order submission and staff calls.
+
+## Repository Structure
+
+```text
+apps/
+  orderlab/
+    OrderLab client app
+
+packages/
+  client/
+    QR-based restaurant ordering client library
+
+  server/
+    Compatible mock server
+```
+
+## Scope
+
+This project may be used for:
+
+- UI/UX experiments
+- Local mock-server testing
+- Client-library development
+- Protocol research in a safe environment
+
+This project should not be used for:
+
+- Sending real orders
+- Calling real store staff
+- Interacting with production restaurant systems
+- Load testing third-party services
+- Bypassing intended service flows
+
+## License
+
+TBD
