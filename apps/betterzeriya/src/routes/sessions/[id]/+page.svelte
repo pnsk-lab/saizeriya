@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import defaultMenuData from '$lib/assets/data/menu.json';
 	import { filterMenuForServicePeriod, getMenuServicePeriod } from '$lib/menu-availability';
+	import { isAlcoholMenuItem } from '$lib/menu-classification';
 	import mockMenuData from '$server-mock/menu.json';
 	import { matchesMenuSearch } from '$lib/menu-search';
 	import { onMount } from 'svelte';
@@ -159,6 +160,7 @@
 	let gachaDialog: HTMLDialogElement | null = null;
 	let gachaResults = $state<MenuItem[]>([]);
 	let gachaBudget = $state(1000);
+	let excludeAlcoholFromGacha = $state(false);
 
 	const cartStorageKey = $derived(`betterzeriya:${sessionId}:cart`);
 	const officialSessionStorageKey = $derived(`betterzeriya:${sessionId}:official-session`);
@@ -507,25 +509,43 @@
 		} catch {}
 	};
 
+	const gachaPool = $derived(
+		serviceMenu.filter(
+			(item) =>
+				item.price > 0 &&
+				menuStatuses[item.code] !== 'unavailable'
+		)
+	);
+
 	const runGacha = (budget = gachaBudget) => {
-		const candidates = serviceMenu.filter(
-			(item) => item.price > 0 && item.price <= budget && menuStatuses[item.code] !== 'unavailable'
-		);
-		// Fisher-Yates shuffle
-		const shuffled = [...candidates];
-		for (let i = shuffled.length - 1; i > 0; i--) {
-			const j = Math.floor(Math.random() * (i + 1));
-			;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-		}
-		const picked: MenuItem[] = [];
-		let remaining = budget;
-		for (const item of shuffled) {
-			if (item.price <= remaining) {
-				picked.push(item);
-				remaining -= item.price;
+		const candidates = excludeAlcoholFromGacha
+			? gachaPool.filter((item) => !isAlcoholMenuItem(item))
+			: gachaPool;
+		const pick = () => {
+			const shuffled = [...candidates];
+			for (let i = shuffled.length - 1; i > 0; i--) {
+				const j = Math.floor(Math.random() * (i + 1));
+				;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+			}
+			const picked: MenuItem[] = [];
+			let remaining = budget;
+			for (const item of shuffled) {
+				if (item.price <= remaining) {
+					picked.push(item);
+					remaining -= item.price;
+				}
+			}
+			return picked;
+		};
+		let results = pick();
+		if (excludeAlcoholFromGacha) {
+			let retries = 0;
+			while (results.some(isAlcoholMenuItem) && retries < 20) {
+				results = pick();
+				retries++;
 			}
 		}
-		gachaResults = picked;
+		gachaResults = results;
 		gachaDialog?.showModal();
 	};
 
@@ -588,7 +608,7 @@
 						<p class="eyebrow">Add</p>
 						<h2>注文追加</h2>
 					</div>
-					<div class="toolbar-actions">
+				<div class="toolbar-actions">
 						<button class="secondary" onclick={() => runGacha()} disabled={busy || !clientState}>
 							<span class="i-tabler-dice-3"></span>
 							ガチャ
@@ -869,6 +889,18 @@
 		<label class="gacha-budget-label">
 			<span>予算 (円)</span>
 			<input bind:value={gachaBudget} type="number" min="100" max="9999" step="100" />
+		</label>
+		<label class="checkbox-option">
+			<input
+				type="checkbox"
+				bind:checked={excludeAlcoholFromGacha}
+				onchange={() => {
+					if (excludeAlcoholFromGacha && gachaResults.some(isAlcoholMenuItem)) {
+						runGacha();
+					}
+				}}
+			/>
+			<span>お酒を抽選から除外</span>
 		</label>
 		{#if gachaResults.length}
 			<div class="gacha-list">
