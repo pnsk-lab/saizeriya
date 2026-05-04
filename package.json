@@ -8,8 +8,8 @@
   "type": "module",
   "scripts": {
     "dev": "bun --cwd packages/server --watch src/main.ts",
-    "build": "bun run --cwd packages/client build && bun run --cwd apps/betterzeriya build",
-    "start": "node apps/betterzeriya/build",
+    "betterzeriya:build": "bun run --cwd packages/client build && bun run --cwd apps/betterzeriya build",
+    "betterzeriya:start": "node apps/betterzeriya/build",
     "cli": "bun --cwd packages/client cli.ts",
     "format": "vp fmt . --write",
     "format:check": "vp fmt . --check",

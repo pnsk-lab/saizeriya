@@ -8,14 +8,6 @@ This repository includes a saizeriya-compatible server, client library, and clie
 bun i
 ```
 
-### Docker-free
-
-```
-bun install
-bun run build # build packages/client & betterzeriya
-bun run start # node apps/betterzeriya/build
-```
-
 ## Compatible Server
 
 ```bash
@@ -87,11 +79,12 @@ Use a different host port by changing the left side of `-p`. For example,
 
 ### Run manually
 
-```bash
-bun i
-cd apps/betterzeriya
-bun run build
-bun vp preview
+### Docker-free
+
+```
+bun install
+bun run betterzeriya:build # build packages/client & betterzeriya
+bun run betterzeriya:start # node apps/betterzeriya/build
 ```
 
 ### Deploy to Cloudflare
