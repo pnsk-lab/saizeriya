@@ -87,11 +87,12 @@ Use a different host port by changing the left side of `-p`. For example,
 
 ### Run manually
 
-```bash
-bun i
-cd apps/betterzeriya
-bun run build
-bun vp preview
+### Docker-free
+
+```
+bun install
+bun run betterzeriya:build # build packages/client & betterzeriya
+bun run betterzeriya:start # node apps/betterzeriya/build
 ```
 
 ### Deploy to Cloudflare
