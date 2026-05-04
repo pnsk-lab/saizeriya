@@ -11,6 +11,9 @@ const config = {
   },
   kit: {
     adapter: process.env.CLOUDFLARE ? cloudflare() : node(),
+    alias: {
+      '$server-mock': '../../packages/server/src/data',
+    },
   },
 }
 

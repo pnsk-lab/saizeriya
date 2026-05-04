@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import defaultMenuData from '$lib/assets/data/menu.json';
 	import { filterMenuForServicePeriod, getMenuServicePeriod } from '$lib/menu-availability';
+	import mockMenuData from '$server-mock/menu.json';
 	import { matchesMenuSearch } from '$lib/menu-search';
 	import { onMount } from 'svelte';
 
@@ -118,6 +119,22 @@
 
 	const defaultMenuItems = normalizeDefaultMenu(defaultMenuData as DefaultMenuEntry[]);
 
+	type MockMenuEntry = { item_data: { id: string; state: number }; result: string };
+	const mockStateMap: Map<string, number> = import.meta.env.DEV
+		? new Map(
+				(mockMenuData as MockMenuEntry[])
+					.filter((entry) => entry.item_data?.id)
+					.map((entry) => [entry.item_data.id, entry.item_data.state ?? 2])
+			)
+		: new Map();
+
+	const initialMenuStatus = (code: string): MenuStatus => {
+		if (!import.meta.env.DEV) return 'unchecked';
+		const mockState = mockStateMap.get(code);
+		if (mockState === undefined) return 'unchecked';
+		return mockState === 0 ? 'unavailable' : 'available';
+	};
+
 	let { data } = $props<{ data: { sessionId: string } }>();
 
 	const sessionId = $derived(data.sessionId);
@@ -127,7 +144,7 @@
 	let checkout = $state<CheckoutPresentation | null>(null);
 	let menu = $state<MenuItem[]>(defaultMenuItems);
 	let menuStatuses = $state<Record<string, MenuStatus>>(
-		Object.fromEntries(defaultMenuItems.map((item) => [item.code, 'unchecked']))
+		Object.fromEntries(defaultMenuItems.map((item) => [item.code, initialMenuStatus(item.code)]))
 	);
 	let menuDetectionSeq = $state<Record<string, number>>({});
 	let currentMenuPeriod = $state(getMenuServicePeriod());
