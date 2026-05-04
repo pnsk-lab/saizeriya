@@ -7,9 +7,12 @@
   ],
   "type": "module",
   "scripts": {
-    "dev": "bun --cwd packages/server --watch src/main.ts",
+    "dev": "cd packages/server && bun --watch src/main.ts",
+    "dev:app": "bun run --cwd apps/betterzeriya dev",
     "betterzeriya:build": "bun run --cwd packages/client build && bun run --cwd apps/betterzeriya build",
     "betterzeriya:start": "node apps/betterzeriya/build",
+    "build": "bun run betterzeriya:build",
+    "start": "HOST=localhost node apps/betterzeriya/build",
     "cli": "bun --cwd packages/client cli.ts",
     "format": "vp fmt . --write",
     "format:check": "vp fmt . --check",
