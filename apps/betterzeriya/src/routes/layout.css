@@ -751,6 +751,7 @@ input:focus {
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.42);
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .menu-card-meta {
@@ -1218,4 +1219,56 @@ input:focus {
     display: grid;
     grid-template-columns: 1fr 1fr;
   }
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.gacha-list {
+  display: grid;
+  gap: 6px;
+}
+
+.gacha-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #f9fafb;
+  font-size: 14px;
+}
+
+.gacha-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 10px 0;
+  border-top: 1px solid rgba(17, 24, 39, 0.1);
+  font-weight: 700;
+}
+
+.gacha-empty {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+  text-align: center;
+  padding: 12px 0;
+}
+
+.gacha-budget-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gacha-budget-label input {
+  width: 100px;
 }

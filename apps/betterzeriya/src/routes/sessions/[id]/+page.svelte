@@ -139,6 +139,9 @@
 	let error = $state('');
 	let busy = $state(false);
 	let activeTab = $state<ActiveTab>('add');
+	let gachaDialog: HTMLDialogElement | null = null;
+	let gachaResults = $state<MenuItem[]>([]);
+	let gachaBudget = $state(1000);
 
 	const cartStorageKey = $derived(`betterzeriya:${sessionId}:cart`);
 	const officialSessionStorageKey = $derived(`betterzeriya:${sessionId}:official-session`);
@@ -487,6 +490,35 @@
 		} catch {}
 	};
 
+	const runGacha = (budget = gachaBudget) => {
+		const candidates = serviceMenu.filter(
+			(item) => item.price > 0 && item.price <= budget && menuStatuses[item.code] !== 'unavailable'
+		);
+		// Fisher-Yates shuffle
+		const shuffled = [...candidates];
+		for (let i = shuffled.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+		}
+		const picked: MenuItem[] = [];
+		let remaining = budget;
+		for (const item of shuffled) {
+			if (item.price <= remaining) {
+				picked.push(item);
+				remaining -= item.price;
+			}
+		}
+		gachaResults = picked;
+		gachaDialog?.showModal();
+	};
+
+	const addGachaToCart = async () => {
+		gachaDialog?.close();
+		for (const item of gachaResults) {
+			await addItem(item);
+		}
+	};
+
 	onMount(() => {
 		restoreOfficialSession();
 		restoreCart();
@@ -539,10 +571,16 @@
 						<p class="eyebrow">Add</p>
 						<h2>注文追加</h2>
 					</div>
-					<label class="search">
-						<span>検索</span>
-						<input bind:value={search} placeholder="メニューを検索" />
-					</label>
+					<div class="toolbar-actions">
+						<button class="secondary" onclick={() => runGacha()} disabled={busy || !clientState}>
+							<span class="i-tabler-dice-3"></span>
+							ガチャ
+						</button>
+						<label class="search">
+							<span>検索</span>
+							<input bind:value={search} placeholder="メニューを検索" />
+						</label>
+					</div>
 				</div>
 
 				<div class="segments" aria-label="カテゴリ">
@@ -806,3 +844,39 @@
 		{/each}
 	</nav>
 </main>
+
+<dialog bind:this={gachaDialog} class="app-dialog">
+	<form method="dialog" class="dialog-body" onsubmit={(event) => event.preventDefault()}>
+		<p class="eyebrow">Gacha</p>
+		<h2>1000円ガチャ結果</h2>
+		<label class="gacha-budget-label">
+			<span>予算 (円)</span>
+			<input bind:value={gachaBudget} type="number" min="100" max="9999" step="100" />
+		</label>
+		{#if gachaResults.length}
+			<div class="gacha-list">
+				{#each gachaResults as item}
+					<div class="gacha-row">
+						<span>{item.name}</span>
+						<strong>¥{item.price.toLocaleString()}</strong>
+					</div>
+				{/each}
+			</div>
+			<div class="gacha-total">
+				<span>合計</span>
+				<strong>¥{gachaResults.reduce((sum, item) => sum + item.price, 0).toLocaleString()}</strong>
+			</div>
+		{:else}
+			<p class="gacha-empty">予算内で組み合わせられるメニューがありません。</p>
+		{/if}
+		<div class="dialog-actions three">
+			<button class="secondary" type="button" onclick={() => gachaDialog?.close()}>閉じる</button>
+			<button class="secondary" type="button" onclick={() => runGacha()}>もう一度</button>
+			{#if gachaResults.length}
+				<button class="primary" type="button" onclick={addGachaToCart} disabled={busy || !clientState}>
+					カートに追加
+				</button>
+			{/if}
+		</div>
+	</form>
+</dialog>
