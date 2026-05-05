@@ -136,10 +136,12 @@ Connect this repository on the Cloudflare Pages dashboard and use the following 
 | Field                   | Value                                                                |
 | ----------------------- | -------------------------------------------------------------------- |
 | Framework preset        | SvelteKit                                                            |
-| Build command           | `bun install && bun run betterzeriya:build:pages`                    |
+| Build command           | `bun run betterzeriya:build:pages`                                   |
 | Build output directory  | `apps/betterzeriya/.svelte-kit/cloudflare`                           |
 | Root directory          | `/` (repository root)                                                |
-| Environment variable    | `CLOUDFLARE=1`                                                       |
+| Environment variables   | `CLOUDFLARE=1`, `BUN_VERSION=1.3.10`                                 |
+
+`BUN_VERSION` is required so the Cloudflare build environment installs bun and runs `bun install` automatically (npm cannot resolve `workspace:*` protocol used by this monorepo).
 
 ## Star History
 
