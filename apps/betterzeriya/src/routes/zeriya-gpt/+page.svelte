@@ -76,11 +76,15 @@
 		loadProgress = 0;
 		loadText = 'モデルを準備しています…';
 		try {
-			const { CreateMLCEngine } = await import('@mlc-ai/web-llm');
+			const { CreateMLCEngine, prebuiltAppConfig } = await import('@mlc-ai/web-llm');
 			const next = await CreateMLCEngine(selectedModel, {
 				initProgressCallback: (report: { progress: number; text: string }) => {
 					loadProgress = Math.max(0, Math.min(1, report.progress ?? 0));
 					loadText = report.text || loadText;
+				},
+				appConfig: {
+					...prebuiltAppConfig,
+					useIndexedDBCache: true
 				}
 			});
 			engine = next;
