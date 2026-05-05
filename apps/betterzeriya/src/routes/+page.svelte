@@ -344,6 +344,10 @@
 			<span class="i-tabler-help-circle"></span>
 			読み取れない場合
 		</button>
+		<a class="manual-link zeriya-gpt-link" href="/zeriya-gpt">
+			<span class="i-tabler-sparkles"></span>
+			zeriyaGPT に相談
+		</a>
 	</div>
 </main>
 

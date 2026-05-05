@@ -292,6 +292,12 @@ button:disabled {
   font-size: 13px;
   font-weight: 800;
   backdrop-filter: blur(14px);
+  text-decoration: none;
+}
+
+.zeriya-gpt-link {
+  border-color: rgba(34, 197, 94, 0.55);
+  background: rgba(22, 101, 52, 0.55);
 }
 
 .scanner-alert {
