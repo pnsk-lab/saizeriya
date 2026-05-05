@@ -34,6 +34,7 @@ const alcoholKeywords = [
 	'キャンティ',
 	'ベルデッキオ',
 	'ドンラファエロ',
+	'グラッパ',
 	'氷結',
 ].map(normalizeClassificationText)
 
