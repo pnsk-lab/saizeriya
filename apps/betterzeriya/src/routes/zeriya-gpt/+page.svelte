@@ -1,9 +1,12 @@
 <script lang="ts">
-	import { onMount, tick } from 'svelte';
+	import { onDestroy, onMount, tick } from 'svelte';
+	import QrScanner from 'qr-scanner';
 	import { buildSystemPrompt } from '$lib/zeriya-gpt/system-prompt';
 
 	type ChatRole = 'user' | 'assistant';
 	type ChatMessage = { role: ChatRole; content: string };
+
+	const SCAN_FLAG_KEY = 'betterzeriya:zeriya-gpt:scanned';
 
 	type ModelOption = {
 		id: string;
@@ -53,6 +56,13 @@
 	let error = $state('');
 	let listEl: HTMLDivElement | null = $state(null);
 	let textareaEl: HTMLTextAreaElement | null = $state(null);
+
+	let unlocked = $state(false);
+	let scanError = $state('');
+	let scannerActive = $state(false);
+	let cameraStarting = $state(false);
+	let videoEl: HTMLVideoElement | null = $state(null);
+	let scanner: QrScanner | null = null;
 
 	const isCloseToBottom = () => {
 		if (!listEl) return true;
@@ -197,16 +207,93 @@
 		await loadEngine();
 	};
 
+	const stopScanner = () => {
+		scannerActive = false;
+		try {
+			scanner?.stop();
+		} catch {}
+	};
+
+	const destroyScanner = () => {
+		scannerActive = false;
+		try {
+			scanner?.destroy();
+		} catch {}
+		scanner = null;
+	};
+
+	const handleScanResult = (value: string) => {
+		const text = value.trim();
+		if (!text.toLowerCase().includes('saizeriya')) {
+			scanError = 'サイゼリヤの QR コードではないようです。';
+			return;
+		}
+		scanError = '';
+		try {
+			sessionStorage.setItem(SCAN_FLAG_KEY, String(Date.now()));
+		} catch {}
+		stopScanner();
+		unlocked = true;
+	};
+
+	const startScanner = async () => {
+		if (scannerActive || cameraStarting || unlocked) return;
+		if (!videoEl) return;
+		cameraStarting = true;
+		scanError = '';
+		try {
+			if (!scanner) {
+				scanner = new QrScanner(
+					videoEl,
+					(result) => {
+						handleScanResult(result.data);
+					},
+					{
+						preferredCamera: 'environment',
+						maxScansPerSecond: 6,
+						returnDetailedScanResult: true
+					}
+				);
+			}
+			await scanner.start();
+			scannerActive = true;
+		} catch {
+			scanError = 'カメラを起動できませんでした。';
+		} finally {
+			cameraStarting = false;
+		}
+	};
+
+	const relock = () => {
+		try {
+			sessionStorage.removeItem(SCAN_FLAG_KEY);
+		} catch {}
+		unlocked = false;
+	};
+
 	onMount(() => {
 		webgpuSupported = detectWebGPU();
 		if (!webgpuSupported) {
 			error = 'このブラウザは WebGPU に未対応です。Chrome / Edge デスクトップ版でお試しください。';
 		}
+		try {
+			if (sessionStorage.getItem(SCAN_FLAG_KEY)) {
+				unlocked = true;
+			}
+		} catch {}
+	});
+
+	onDestroy(() => {
+		destroyScanner();
 	});
 
 	$effect(() => {
-		void messages;
-		// keep focus stable
+		if (!unlocked && videoEl && !scannerActive) {
+			void startScanner();
+		}
+		if (unlocked && scanner) {
+			destroyScanner();
+		}
 	});
 </script>
 
@@ -224,17 +311,57 @@
 			<strong>zeriyaGPT</strong>
 			<small>WebGPU で動くブラウザ完結型アシスタント</small>
 		</div>
-		<button
-			class="zg-icon-button"
-			type="button"
-			onclick={resetChat}
-			disabled={generating || messages.length === 0}
-			aria-label="会話をリセット"
-		>
-			<span class="i-tabler-refresh"></span>
-		</button>
+		{#if unlocked}
+			<button
+				class="zg-icon-button"
+				type="button"
+				onclick={resetChat}
+				disabled={generating || messages.length === 0}
+				aria-label="会話をリセット"
+			>
+				<span class="i-tabler-refresh"></span>
+			</button>
+		{:else}
+			<span class="zg-icon-button" aria-hidden="true">
+				<span class="i-tabler-lock"></span>
+			</span>
+		{/if}
 	</header>
 
+	{#if !unlocked}
+		<div class="zg-gate">
+			<div class="zg-gate-card">
+				<div class="zg-gate-mark">Z</div>
+				<h1>サイゼに来てから話そう</h1>
+				<p>テーブルの公式 QR を読み取るとチャットを開始できます。</p>
+
+				<div class="zg-gate-camera">
+					<!-- svelte-ignore a11y_media_has_caption -->
+					<video bind:this={videoEl} muted playsinline></video>
+					<div class="zg-gate-frame" aria-hidden="true">
+						<span></span>
+						<span></span>
+						<span></span>
+						<span></span>
+					</div>
+				</div>
+
+				<small class="zg-gate-status">
+					{#if cameraStarting}
+						カメラを起動しています…
+					{:else if scannerActive}
+						テーブルの QR コードを枠内に映してください
+					{:else}
+						カメラを起動できませんでした
+					{/if}
+				</small>
+
+				{#if scanError}
+					<div class="zg-alert" role="alert">{scanError}</div>
+				{/if}
+			</div>
+		</div>
+	{:else}
 	<div class="zg-model-bar">
 		{#each modelOptions as opt (opt.id)}
 			<button
@@ -331,6 +458,7 @@
 			ブラウザ内で完結 · 入力内容はサーバーに送信されません
 		</small>
 	</div>
+	{/if}
 </div>
 
 <style>
@@ -717,5 +845,116 @@
 		.zg-samples {
 			grid-template-columns: 1fr;
 		}
+	}
+
+	.zg-gate {
+		display: grid;
+		place-items: center;
+		padding: 32px 4px;
+	}
+
+	.zg-gate-card {
+		display: grid;
+		justify-items: center;
+		gap: 14px;
+		width: 100%;
+		max-width: 480px;
+		padding: 28px 24px;
+		border: 1px solid rgba(17, 24, 39, 0.08);
+		border-radius: 22px;
+		background: #ffffff;
+		box-shadow: 0 18px 50px rgba(17, 24, 39, 0.08);
+		text-align: center;
+	}
+
+	.zg-gate-mark {
+		display: grid;
+		place-items: center;
+		width: 56px;
+		height: 56px;
+		border-radius: 18px;
+		background: linear-gradient(135deg, #16a34a, #166534);
+		color: #ffffff;
+		font-size: 26px;
+		font-weight: 900;
+	}
+
+	.zg-gate-card h1 {
+		margin: 4px 0 0;
+		font-size: 20px;
+		color: #111827;
+	}
+
+	.zg-gate-card p {
+		margin: 0;
+		font-size: 13px;
+		color: #6b7280;
+	}
+
+	.zg-gate-camera {
+		position: relative;
+		width: 100%;
+		aspect-ratio: 1;
+		max-width: 320px;
+		overflow: hidden;
+		border-radius: 18px;
+		background: #030712;
+	}
+
+	.zg-gate-camera video {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.zg-gate-frame {
+		position: absolute;
+		inset: 16%;
+		pointer-events: none;
+	}
+
+	.zg-gate-frame span {
+		position: absolute;
+		width: 22px;
+		height: 22px;
+		border-color: #ffffff;
+	}
+
+	.zg-gate-frame span:nth-child(1) {
+		top: 0;
+		left: 0;
+		border-top: 3px solid;
+		border-left: 3px solid;
+		border-radius: 6px 0 0 0;
+	}
+
+	.zg-gate-frame span:nth-child(2) {
+		top: 0;
+		right: 0;
+		border-top: 3px solid;
+		border-right: 3px solid;
+		border-radius: 0 6px 0 0;
+	}
+
+	.zg-gate-frame span:nth-child(3) {
+		bottom: 0;
+		left: 0;
+		border-bottom: 3px solid;
+		border-left: 3px solid;
+		border-radius: 0 0 0 6px;
+	}
+
+	.zg-gate-frame span:nth-child(4) {
+		bottom: 0;
+		right: 0;
+		border-bottom: 3px solid;
+		border-right: 3px solid;
+		border-radius: 0 0 6px 0;
+	}
+
+	.zg-gate-status {
+		font-size: 12px;
+		color: #6b7280;
+		font-weight: 700;
 	}
 </style>
