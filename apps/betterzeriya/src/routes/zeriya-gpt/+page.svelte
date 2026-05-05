@@ -13,6 +13,11 @@
 
 	const modelOptions: ModelOption[] = [
 		{
+			id: 'Qwen3-0.6B-q4f16_1-MLC',
+			label: 'Qwen3 0.6B',
+			hint: '初回 ~400MB · 最軽量'
+		},
+		{
 			id: 'Llama-3.2-1B-Instruct-q4f16_1-MLC',
 			label: 'Llama 3.2 1B',
 			hint: '初回 ~750MB · 軽量・サクサク'
