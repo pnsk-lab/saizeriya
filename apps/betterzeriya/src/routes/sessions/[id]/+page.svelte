@@ -546,7 +546,9 @@
 			}
 		}
 		gachaResults = results;
-		gachaDialog?.showModal();
+		if (!gachaDialog?.open) {
+			gachaDialog?.showModal();
+		}
 	};
 
 	const addGachaToCart = async () => {
@@ -891,15 +893,16 @@
 			<input bind:value={gachaBudget} type="number" min="100" max="9999" step="100" />
 		</label>
 		<label class="checkbox-option">
-			<input
-				type="checkbox"
-				bind:checked={excludeAlcoholFromGacha}
-				onchange={() => {
-					if (excludeAlcoholFromGacha && gachaResults.some(isAlcoholMenuItem)) {
-						runGacha();
-					}
-				}}
-			/>
+		<input
+			type="checkbox"
+			bind:checked={excludeAlcoholFromGacha}
+			onchange={(event) => {
+				const checked = (event.currentTarget as HTMLInputElement).checked;
+				if (checked && gachaResults.some(isAlcoholMenuItem)) {
+					runGacha();
+				}
+			}}
+		/>
 			<span>お酒を抽選から除外</span>
 		</label>
 		{#if gachaResults.length}
