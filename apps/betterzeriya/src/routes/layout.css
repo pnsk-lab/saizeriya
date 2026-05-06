@@ -1309,3 +1309,10 @@ input:focus {
 .gacha-budget-label input {
   width: 100px;
 }
+
+.gacha-note {
+  margin: 0;
+  color: #4b5563;
+  font-size: 14px;
+  line-height: 1.6;
+}

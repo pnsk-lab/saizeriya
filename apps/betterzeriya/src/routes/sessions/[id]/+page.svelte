@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import defaultMenuData from '$lib/assets/data/menu.json';
+	import { calculateExactBudgetGacha, type ExactBudgetSelection } from '$lib/gacha';
 	import { filterMenuForServicePeriod, getMenuServicePeriod } from '$lib/menu-availability';
 	import { isAlcoholMenuItem } from '$lib/menu-classification';
 	import { matchesMenuSearch } from '$lib/menu-search';
@@ -145,8 +146,10 @@
 	let busy = $state(false);
 	let activeTab = $state<ActiveTab>('add');
 	let gachaDialog: HTMLDialogElement | null = null;
-	let gachaResults = $state<MenuItem[]>([]);
+	let gachaResults = $state<ExactBudgetSelection<MenuItem>[]>([]);
 	let gachaBudget = $state(1000);
+	let gachaCount = $state(0n);
+	let gachaHasRun = $state(false);
 	let excludeAlcoholFromGacha = $state(false);
 
 	const cartStorageKey = $derived(`betterzeriya:${sessionId}:cart`);
@@ -506,44 +509,59 @@
 	);
 
 	const runGacha = (budget = gachaBudget) => {
+		if (!Number.isInteger(budget) || budget < 0) {
+			error = '予算は 0 以上の整数で入力してください。';
+			return;
+		}
+
 		const candidates = excludeAlcoholFromGacha
 			? gachaPool.filter((item) => !isAlcoholMenuItem(item))
 			: gachaPool;
-		const pick = () => {
-			const shuffled = [...candidates];
-			for (let i = shuffled.length - 1; i > 0; i--) {
-				const j = Math.floor(Math.random() * (i + 1));
-				;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+
+		try {
+			const result = calculateExactBudgetGacha(candidates, budget);
+			gachaCount = result.count;
+			gachaResults = result.sample ?? [];
+			gachaHasRun = true;
+			if (!gachaDialog?.open) {
+				gachaDialog?.showModal();
 			}
-			const picked: MenuItem[] = [];
-			let remaining = budget;
-			for (const item of shuffled) {
-				if (item.price <= remaining) {
-					picked.push(item);
-					remaining -= item.price;
-				}
-			}
-			return picked;
-		};
-		let results = pick();
-		if (excludeAlcoholFromGacha) {
-			let retries = 0;
-			while (results.some(isAlcoholMenuItem) && retries < 20) {
-				results = pick();
-				retries++;
-			}
-		}
-		gachaResults = results;
-		if (!gachaDialog?.open) {
-			gachaDialog?.showModal();
+		} catch (caught) {
+			error = caught instanceof Error ? caught.message : 'ガチャの計算に失敗しました';
 		}
 	};
 
 	const addGachaToCart = async () => {
-		gachaDialog?.close();
-		for (const item of gachaResults) {
-			await addItem(item);
+		const nextCart = [...localCart];
+
+		for (const selection of gachaResults) {
+			const current = nextCart.find((cartItem) => cartItem.id === selection.item.code);
+			const nextCount = (current?.count ?? 0) + selection.quantity;
+			if (nextCount > 99) {
+				error = '数量は 99 点までです';
+				return;
+			}
 		}
+
+		for (const selection of gachaResults) {
+			const current = nextCart.find((cartItem) => cartItem.id === selection.item.code);
+			if (current) {
+				current.name = selection.item.name;
+				current.price = selection.item.price;
+				current.count += selection.quantity;
+			} else {
+				nextCart.push({
+					id: selection.item.code,
+					name: selection.item.name,
+					price: selection.item.price,
+					count: selection.quantity
+				});
+			}
+		}
+
+		commitCart(nextCart);
+		gachaDialog?.close();
+		notify('ガチャ結果をカートに入れました');
 	};
 
 	onMount(() => {
@@ -885,33 +903,38 @@
 			<input bind:value={gachaBudget} type="number" min="100" max="9999" step="100" />
 		</label>
 		<label class="checkbox-option">
-		<input
-			type="checkbox"
-			bind:checked={excludeAlcoholFromGacha}
-			onchange={(event) => {
-				const checked = (event.currentTarget as HTMLInputElement).checked;
-				if (checked && gachaResults.some(isAlcoholMenuItem)) {
-					runGacha();
-				}
-			}}
-		/>
+				<input
+					type="checkbox"
+					bind:checked={excludeAlcoholFromGacha}
+					onchange={(event) => {
+						const checked = (event.currentTarget as HTMLInputElement).checked;
+						if (checked && gachaResults.some((selection) => isAlcoholMenuItem(selection.item))) {
+							runGacha();
+						}
+					}}
+				/>
 			<span>お酒を抽選から除外</span>
 		</label>
+			{#if gachaHasRun}
+				<p class="gacha-note">
+					予算ちょうどの組み合わせは <strong>{gachaCount.toLocaleString()}</strong> 通りです。
+				</p>
+			{/if}
 		{#if gachaResults.length}
 			<div class="gacha-list">
 				{#each gachaResults as item}
 					<div class="gacha-row">
-						<span>{item.name}</span>
-						<strong>¥{item.price.toLocaleString()}</strong>
+							<span>{item.item.name} × {item.quantity}</span>
+							<strong>¥{item.subtotal.toLocaleString()}</strong>
 					</div>
 				{/each}
 			</div>
 			<div class="gacha-total">
 				<span>合計</span>
-				<strong>¥{gachaResults.reduce((sum, item) => sum + item.price, 0).toLocaleString()}</strong>
+					<strong>¥{gachaResults.reduce((sum, item) => sum + item.subtotal, 0).toLocaleString()}</strong>
 			</div>
 		{:else}
-			<p class="gacha-empty">予算内で組み合わせられるメニューがありません。</p>
+				<p class="gacha-empty">予算ちょうどの組み合わせがありません。</p>
 		{/if}
 		<div class="dialog-actions three">
 			<button class="secondary" type="button" onclick={() => gachaDialog?.close()}>閉じる</button>
