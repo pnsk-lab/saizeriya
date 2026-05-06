@@ -869,7 +869,7 @@
 				{/if}
 			</button>
 		{/each}
-		<a href="/zeriya-gpt">
+		<a href={`/sessions/${sessionId}/ai`}>
 			<span class="i-tabler-sparkles" aria-hidden="true"></span>
 			<span>zeriyaGPT</span>
 		</a>
