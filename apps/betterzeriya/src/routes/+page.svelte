@@ -324,6 +324,10 @@
 			<span class="i-tabler-link"></span>
 			URL 入力
 		</button>
+		<a href="/zeriya-gpt" role="tab" aria-selected="false">
+			<span class="i-tabler-sparkles"></span>
+			zeriyaGPT
+		</a>
 	</div>
 
 	{#if error}
@@ -344,10 +348,6 @@
 			<span class="i-tabler-help-circle"></span>
 			読み取れない場合
 		</button>
-		<a class="manual-link zeriya-gpt-link" href="/zeriya-gpt">
-			<span class="i-tabler-sparkles"></span>
-			zeriyaGPT に相談
-		</a>
 	</div>
 </main>
 

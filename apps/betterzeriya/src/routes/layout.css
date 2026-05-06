@@ -197,7 +197,7 @@ button:disabled {
   left: 16px;
   right: 16px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   max-width: 520px;
   margin: 0 auto;
@@ -208,7 +208,8 @@ button:disabled {
   backdrop-filter: blur(16px);
 }
 
-.scanner-tabs button {
+.scanner-tabs button,
+.scanner-tabs a {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -220,9 +221,11 @@ button:disabled {
   color: rgba(255, 255, 255, 0.66);
   font-size: 13px;
   font-weight: 800;
+  text-decoration: none;
 }
 
-.scanner-tabs button.active {
+.scanner-tabs button.active,
+.scanner-tabs a.active {
   background: rgba(0, 0, 0, 0.3);
   color: #ffffff;
 }
@@ -293,11 +296,6 @@ button:disabled {
   font-weight: 800;
   backdrop-filter: blur(14px);
   text-decoration: none;
-}
-
-.zeriya-gpt-link {
-  border-color: rgba(34, 197, 94, 0.55);
-  background: rgba(22, 101, 52, 0.55);
 }
 
 .scanner-alert {
