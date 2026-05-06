@@ -20,7 +20,7 @@ export function calculateExactBudgetGacha<T extends PriceItem>(
 ): ExactBudgetResult<T> {
   assertInput(items, target)
 
-  const suffixGcd = new Array<number>(items.length + 1).fill(0)
+  const suffixGcd = Array.from<number>({ length: items.length + 1 }).fill(0)
 
   for (let index = items.length - 1; index >= 0; index -= 1) {
     suffixGcd[index] = gcd(items[index].price, suffixGcd[index + 1])
@@ -76,7 +76,7 @@ function sampleQuantities<T extends PriceItem>(
   countSolutions: (itemIndex: number, rest: number) => bigint,
 ): number[] {
   if (rest === 0) {
-    return new Array(items.length - itemIndex).fill(0)
+    return Array.from<number>({ length: items.length - itemIndex }).fill(0)
   }
 
   if (itemIndex >= items.length) {
