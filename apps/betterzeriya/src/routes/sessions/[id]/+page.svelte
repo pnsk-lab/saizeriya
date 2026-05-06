@@ -869,6 +869,10 @@
 				{/if}
 			</button>
 		{/each}
+		<a href="/zeriya-gpt">
+			<span class="i-tabler-sparkles" aria-hidden="true"></span>
+			<span>zeriyaGPT</span>
+		</a>
 	</nav>
 </main>
 

@@ -324,10 +324,6 @@
 			<span class="i-tabler-link"></span>
 			URL 入力
 		</button>
-		<a href="/zeriya-gpt" role="tab" aria-selected="false">
-			<span class="i-tabler-sparkles"></span>
-			zeriyaGPT
-		</a>
 	</div>
 
 	{#if error}
