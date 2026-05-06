@@ -1,5 +1,7 @@
 # saizeriya
 
+[![技術者倫理 遵守済み](https://img.shields.io/badge/%E6%8A%80%E8%A1%93%E8%80%85%E5%80%AB%E7%90%86-%E9%81%B5%E5%AE%88%E6%B8%88%E3%81%BF-0a0a0a?style=for-the-badge&labelColor=ffffff)](https://技術者倫理.com)
+
 > [!Warning]
 >
 > This is not officially endorsed by Saizeriya. It has no connection to the Saizeriya organization. Please use it with caution.
@@ -133,13 +135,13 @@ bun run --cwd apps/betterzeriya preview:pages
 
 Connect this repository on the Cloudflare Pages dashboard and use the following settings:
 
-| Field                   | Value                                                                |
-| ----------------------- | -------------------------------------------------------------------- |
-| Framework preset        | SvelteKit                                                            |
-| Build command           | `bun install && bun run betterzeriya:build:pages`                    |
-| Build output directory  | `apps/betterzeriya/.svelte-kit/cloudflare`                           |
-| Root directory          | `/` (repository root)                                                |
-| Environment variables   | `CLOUDFLARE=1`, `BUN_VERSION=1.3.10`                                 |
+| Field                  | Value                                             |
+| ---------------------- | ------------------------------------------------- |
+| Framework preset       | SvelteKit                                         |
+| Build command          | `bun install && bun run betterzeriya:build:pages` |
+| Build output directory | `apps/betterzeriya/.svelte-kit/cloudflare`        |
+| Root directory         | `/` (repository root)                             |
+| Environment variables  | `CLOUDFLARE=1`, `BUN_VERSION=1.3.10`              |
 
 `BUN_VERSION` makes the Cloudflare build environment install bun. `bun install` must be run explicitly in the build command — Cloudflare does not auto-install dependencies for bun projects, and npm cannot resolve the `workspace:*` protocol used by this monorepo.
 
