@@ -10,6 +10,7 @@ import { Receipt } from './template/Receipt'
 import { Top } from './template/Top'
 
 export type Page =
+  | 'entry'
   | 'history'
   | 'main'
   | 'top'
@@ -33,6 +34,7 @@ interface PostedPageData {
 type DashboardTableData = {
   peopleCount?: string
   page?: Page
+  peopleCountRegistered?: string
   lastOrderClosed?: string
   midnightCharge?: string
   orderStarted?: string
@@ -94,6 +96,7 @@ export interface TableState {
   shopId: number
   tableId: number
   peopleCount: number
+  peopleCountRegistered: boolean
   page: Page
   token: string
   sessionId: string
@@ -148,12 +151,13 @@ const assetFile = (path: string) => Bun.file(new URL(`../assets/${path}`, import
 const pageComponents = {
   account: Account,
   call: Call,
+  entry: () => Top({ page: 'entry' }),
   history: History,
   main: Main,
   menu: Menu,
   number: PeopleNumber,
   receipt: Receipt,
-  top: Top,
+  top: () => Top({ page: 'top' }),
 } satisfies Record<Exclude<Page, 'order'>, () => unknown>
 
 const setInputValue = (html: string, id: string, value: string) =>
@@ -189,8 +193,9 @@ export class Table {
     this.state = {
       shopId,
       tableId,
-      peopleCount: 2,
-      page: 'top',
+      peopleCount: 0,
+      peopleCountRegistered: false,
+      page: 'entry',
       token: `${crypto.randomUUID()}.${Math.random().toString().slice(2)}`,
       sessionId: crypto.randomUUID().replaceAll('-', ''),
       cart: [],
@@ -210,6 +215,7 @@ export class Table {
 
   setPeopleCount(count: number) {
     this.state.peopleCount = count
+    this.state.peopleCountRegistered = true
     return this
   }
 
@@ -273,6 +279,7 @@ export class Server {
           const form = await c.req.formData()
           const data = Object.fromEntries(form.entries()) as DashboardTableData
           table.state.peopleCount = parseNumberField(data.peopleCount, table.state.peopleCount)
+          table.state.peopleCountRegistered = data.peopleCountRegistered === 'on'
           table.state.page = data.page ?? table.state.page
           table.state.lastOrderClosed = data.lastOrderClosed === 'on'
           table.state.midnightCharge = data.midnightCharge === 'on'
@@ -347,14 +354,14 @@ export class Server {
         const tableId = c.req.query('table')
         const table =
           (tableId ? this.tables.get(tableId) : undefined) ?? this.createNewTable(525, 51)
-        const id = this.#createURLId(table, 'top')
+        const id = this.#createURLId(table, this.#qrLandingPage(table))
         return c.redirect(`./?${id}`)
       })
       .all('/', async (c) => {
         const url = new URL(c.req.url)
         const qrTable = this.#findOrCreateTableFromQR(url)
         if (qrTable) {
-          const id = this.#createURLId(qrTable, 'top')
+          const id = this.#createURLId(qrTable, this.#qrLandingPage(qrTable))
           return c.redirect(`./?${id}`)
         }
 
@@ -437,6 +444,15 @@ export class Server {
           },
         })
       })
+      .get('/src/page/js/base.js.php', (c) => {
+        const jsName = c.req.query('JS')
+        if (!jsName || jsName.includes('..')) {
+          return c.text('Invalid JS parameter', 400)
+        }
+        return c.text(`/* clean-room compatibility placeholder: ${jsName} */`, 200, {
+          'content-type': 'text/javascript; charset=UTF-8',
+        })
+      })
       .get('/data/:path{.+}', async (c) => {
         const path = c.req.param('path')
         if (path.includes('..')) {
@@ -447,6 +463,33 @@ export class Server {
           return c.text('File not found', 404)
         }
         return c.body(file.stream())
+      })
+      .get('/src/:path{.+}', async (c) => {
+        const path = c.req.param('path')
+        if (path.includes('..')) {
+          return c.text('Invalid path', 400)
+        }
+        const file = assetFile(`src/${path}`)
+        if (await file.exists()) {
+          return c.body(file.stream())
+        }
+        const fallback = assetFile(
+          `src/${path}`.replace(/\.js\.php$/, '.js.php.js').replace(/\.css\.php$/, '.css.php.css'),
+        )
+        if (await fallback.exists()) {
+          return c.body(fallback.stream())
+        }
+        if (path.endsWith('.css') || path.includes('.css.php')) {
+          return c.text('/* clean-room compatibility placeholder */', 200, {
+            'content-type': 'text/css; charset=UTF-8',
+          })
+        }
+        if (path.endsWith('.js') || path.includes('.js.php')) {
+          return c.text('/* clean-room compatibility placeholder */', 200, {
+            'content-type': 'text/javascript; charset=UTF-8',
+          })
+        }
+        return c.text('File not found', 404)
       })
   }
 
@@ -459,6 +502,10 @@ export class Server {
     const tableId = Number.parseInt(url.searchParams.get('TB') ?? '51', 10)
     const existing = this.#findTableByShopAndTable(shopId, tableId)
     return existing ?? this.createNewTable(shopId, tableId)
+  }
+
+  #qrLandingPage(table: Table): Page {
+    return table.state.peopleCountRegistered ? 'top' : 'entry'
   }
 
   async #findTableFromForm(formPromise: Promise<FormData>) {
@@ -487,6 +534,7 @@ export class Server {
 
     if (page === 'menu' && data.ctrl === 'number' && data.number) {
       table.state.peopleCount = Number.parseInt(data.number, 10)
+      table.state.peopleCountRegistered = true
     }
 
     if (page === 'main' && data.ctrl === 'add' && data.code) {
@@ -558,6 +606,13 @@ export class Server {
     rewritten = setInputValue(rewritten, 'session-id', table.state.sessionId)
     rewritten = setInputValue(rewritten, 'number', table.state.peopleCount.toString())
     rewritten = setNamedInputValue(rewritten, 'token', table.state.token)
+
+    if (rewritten.includes('entry-page') || rewritten.includes('top-page')) {
+      rewritten = rewritten.replace(
+        /(<div id="number" class="btn text">)[\s\S]*?(<\/div>)/,
+        `$1${escapeHTML(table.state.peopleCount)}名$2`,
+      )
+    }
 
     if (rewritten.includes('history-page')) {
       rewritten = this.#rewriteOrderList(rewritten, table, 'history')
@@ -632,20 +687,13 @@ export class Server {
     const count = lines.reduce((sum, line) => sum + line.count, 0)
     const total = lines.reduce((sum, line) => sum + line.price, 0)
     const rows = lines
-      .map(
-        (line) =>
-          `<tr><td>${escapeHTML(line.name)}</td><td>${escapeHTML(line.count)}</td><td>${escapeHTML(formatAmount(line.price))}</td></tr>`,
-      )
-      .join('')
-    const hiddenFields = table.state.cart
-      .map(
-        (item) =>
-          `<input type="hidden" name="item[id][]" value="${escapeHTML(item.id)}" /><input type="hidden" name="item[count][]" value="${escapeHTML(item.count)}" /><input type="hidden" name="item[reorder][]" value="${escapeHTML(item.reorder)}" /><input type="hidden" name="item[mod_id][]" value="${escapeHTML(item.modId)}" /><input type="hidden" name="item[mod_count][]" value="${escapeHTML(item.modCount)}" />`,
-      )
+      .map((line) => {
+        const unitPrice = line.count > 0 ? Math.round(line.price / line.count) : 0
+        return `<tr data-unit-price="${escapeHTML(unitPrice)}"><td><div class="name"><span>${escapeHTML(line.name)}</span></div><input type="hidden" name="item[id][]" value="${escapeHTML(line.id)}" /><input type="hidden" name="item[reorder][]" value="${escapeHTML(line.reorder)}" /><input type="hidden" name="item[mod_id][]" value="${escapeHTML(line.modId)}" /><input type="hidden" name="item[mod_count][]" value="${escapeHTML(line.modCount)}" /></td><td><button type="button" class="minus">-</button><input name="item[count][]" type="number" value="${escapeHTML(line.count)}" readonly /><button type="button" class="plus">+</button></td><td>${escapeHTML(formatAmount(line.price))}<button type="button" class="del">Remove</button></td></tr>`
+      })
       .join('')
 
     return html
-      .replace(/(<input type="hidden" id="is-first-order" value="YES" \/>)/, `$1${hiddenFields}`)
       .replace(
         /(<div class="list-base"[^>]*>\s*<div class="list"[^>]*>\s*<table>\s*<tbody>)[\s\S]*?(<\/tbody>)/,
         `$1${rows}$2`,
@@ -690,6 +738,7 @@ export class Server {
 
   #renderDashboard() {
     const pageOptions = [
+      'entry',
       'top',
       'number',
       'menu',
@@ -722,7 +771,7 @@ export class Server {
             </div>
             <p>shop ${escapeHTML(state.shopId)} / table id ${escapeHTML(table.id)}</p>
             <form method="post" action="/dashboard/table/${escapeHTML(table.id)}" class="grid">
-              <label>people <input name="peopleCount" type="number" min="1" value="${escapeHTML(state.peopleCount)}"></label>
+              <label>people <input name="peopleCount" type="number" min="0" value="${escapeHTML(state.peopleCount)}"></label>
               <label>page
                 <select name="page">
                   ${pageOptions
@@ -733,6 +782,7 @@ export class Server {
                     .join('')}
                 </select>
               </label>
+              <label><input name="peopleCountRegistered" type="checkbox"${checked(state.peopleCountRegistered)}> people count registered</label>
               <label><input name="orderStarted" type="checkbox"${checked(state.orderStarted)}> order started</label>
               <label><input name="lastOrderClosed" type="checkbox"${checked(state.lastOrderClosed)}> last order closed</label>
               <label><input name="midnightCharge" type="checkbox"${checked(state.midnightCharge)}> midnight charge</label>

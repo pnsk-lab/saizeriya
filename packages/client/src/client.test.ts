@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test'
-import mockServer from '../../server/src/main'
+import mockServer, { Server } from '../../server/src/main'
 import { createClient } from './client'
 
 describe('createClient', () => {
@@ -14,17 +14,44 @@ describe('createClient', () => {
     await expect(client.call()).resolves.toEqual({ result: 'OK' })
   })
 
-  it('can pause at the official top page with an existing people count', async () => {
+  it('starts at the entry page until a people count is registered', async () => {
     const client = await createClient({
       qrURLSource: 'http://example.com/saizeriya3/qr',
       fetchSource: mockServer.fetch,
     })
-    expect(client.getState().peopleCount).toBe(2)
-    expect(client.getState().pageKind).toBe('top')
+    expect(client.getState().peopleCount).toBe(0)
+    expect(client.getState().pageKind).toBe('entry')
 
     await client.setPeopleCount(2)
     expect(client.getState().peopleCount).toBe(2)
     expect(client.getState().pageKind).toBe('menu')
+  })
+
+  it('shares entry completion across devices using the same QR', async () => {
+    const server = new Server()
+    const table = server.createNewTable(525, 51)
+    const qrURLSource = table.createQRCodeURL('http://example.com', '/saizeriya3')
+
+    const firstDevice = await createClient({
+      qrURLSource,
+      fetchSource: server.app.fetch,
+    })
+    expect(firstDevice.getState().pageKind).toBe('entry')
+
+    const secondDeviceBeforeRegistration = await createClient({
+      qrURLSource,
+      fetchSource: server.app.fetch,
+    })
+    expect(secondDeviceBeforeRegistration.getState().pageKind).toBe('entry')
+
+    await firstDevice.setPeopleCount(5)
+
+    const secondDeviceAfterRegistration = await createClient({
+      qrURLSource,
+      fetchSource: server.app.fetch,
+    })
+    expect(secondDeviceAfterRegistration.getState().pageKind).toBe('top')
+    expect(secondDeviceAfterRegistration.getState().peopleCount).toBe(5)
   })
 
   it('looks up and adds items sequentially', async () => {

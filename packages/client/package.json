@@ -23,14 +23,18 @@
       "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs"
     },
+    "./browser-mode": {
+      "types": "./dist/browser-mode.d.mts",
+      "import": "./dist/browser-mode.mjs"
+    },
     "./package.json": "./package.json"
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "vp pack index.ts cli.ts --dts --clean",
-    "pack": "vp pack index.ts cli.ts --dts --clean",
+    "build": "vp pack index.ts browser-mode.ts cli.ts --dts --clean",
+    "pack": "vp pack index.ts browser-mode.ts cli.ts --dts --clean",
     "cli": "bun cli.ts",
     "test": "vp test",
     "test:watch": "vp test watch"
@@ -40,9 +44,13 @@
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
+    "playwright": "^1.57.0",
     "typescript": "^5"
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "optionalDependencies": {
+    "playwright": "^1.57.0"
   }
 }

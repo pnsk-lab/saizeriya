@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
+    "dev:browser": "BROWSER=1 vite dev",
     "build": "vite build",
-    "build:pages": "CLOUDFLARE=1 vite build",
+    "build:browser": "BROWSER=1 vite build",
     "preview": "vite preview",
     "preview:pages": "wrangler pages dev .svelte-kit/cloudflare",
     "deploy:pages": "wrangler pages deploy .svelte-kit/cloudflare",
@@ -29,6 +30,7 @@
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
     "@tailwindcss/vite": "^4.2.2",
     "@types/node": "^24.10.1",
+    "playwright": "^1.59.1",
     "svelte": "^5.55.2",
     "svelte-check": "^4.4.6",
     "tailwindcss": "^4.2.2",

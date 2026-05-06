@@ -12,13 +12,20 @@ import { stdin as input, stdout as output } from 'node:process'
 import { createInterface } from 'node:readline/promises'
 
 type OfficialClient = Awaited<ReturnType<typeof createClient>>
+type BrowserOfficialClient = Awaited<
+  ReturnType<typeof import('./src/browser-mode').createBrowserClient>
+>
+type AnyOfficialClient = OfficialClient | BrowserOfficialClient
 type CookieEntry = [string, string]
 type FetchSource = (request: Request) => Promise<Response> | Response
+type ClientMode = 'fetch' | 'browser'
 
 interface SessionSnapshot {
   name: string
   state: ClientState
   cookies: CookieEntry[]
+  mode?: ClientMode
+  qrURLSource?: string
   createdAt: number
   updatedAt: number
 }
@@ -27,7 +34,7 @@ const cliHome = process.env.SAIZERIYA_CLI_HOME ?? join(homedir(), '.saizeriya-cl
 const sessionsPath = join(cliHome, 'sessions.json')
 
 const usage = `Usage:
-  saizeriya start <name> <qrurl> [--people <count>]
+  saizeriya start <name> <qrurl> [--people <count>] [--browser] [--headless]
   saizeriya use <name>
   saizeriya list
   saizeriya rm <name>
@@ -70,8 +77,10 @@ const writeSessions = async (sessions: Record<string, SessionSnapshot>) => {
 
 const saveSession = async (
   name: string,
-  client: OfficialClient,
+  client: AnyOfficialClient,
   cookies: CookieEntry[],
+  mode: ClientMode = 'fetch',
+  qrURLSource?: string,
   createdAt = Date.now(),
 ) => {
   const sessions = await readSessions()
@@ -79,6 +88,8 @@ const saveSession = async (
     name,
     state: client.getState(),
     cookies,
+    mode,
+    qrURLSource,
     createdAt,
     updatedAt: Date.now(),
   }
@@ -135,6 +146,47 @@ const parseNumberOption = (args: string[], name: string) => {
     throw new Error(`${name} requires an integer value`)
   }
   return parsed
+}
+
+const hasFlag = (args: string[], name: string) => args.includes(name)
+
+const stripCliOptions = (args: string[]) => {
+  const stripped: string[] = []
+  for (let index = 0; index < args.length; index++) {
+    const arg = args[index]
+    if (arg === undefined) {
+      continue
+    }
+    if (arg === '--browser' || arg === '--headless') {
+      continue
+    }
+    stripped.push(arg)
+    if (arg === '--people' || arg === '--mod-id' || arg === '--mod-count') {
+      const value = args[index + 1]
+      if (value !== undefined) {
+        stripped.push(value)
+        index++
+      }
+    }
+  }
+  return stripped
+}
+
+const useBrowserMode = (args: string[]) => hasFlag(args, '--browser') || process.env.BROWSER === '1'
+
+const browserInstallHint = [
+  'Browser mode requires Playwright to be installed in the same execution environment.',
+  'With npm/npx, run:',
+  '  npm exec --package saizeriya.js --package playwright -- saizeriya start <name> <qrurl> --browser',
+  'With bunx, optional dependencies are normally installed with the package; if your environment omits them, run from a project that has playwright installed.',
+].join('\n')
+
+const loadBrowserClient = async () => {
+  try {
+    return await import('./src/browser-mode')
+  } catch (error) {
+    throw new Error(browserInstallHint, { cause: error })
+  }
 }
 
 const tokenize = (line: string) => {
@@ -233,7 +285,10 @@ const requireArg = (args: string[], index: number, name: string) => {
   return value
 }
 
-const runCommand = async (client: OfficialClient, args: string[]): Promise<'continue' | 'exit'> => {
+const runCommand = async (
+  client: AnyOfficialClient,
+  args: string[],
+): Promise<'continue' | 'exit'> => {
   const command = args[0]
 
   switch (command) {
@@ -311,9 +366,19 @@ const runCommand = async (client: OfficialClient, args: string[]): Promise<'cont
       printState(await client.reorder(requireArg(args, 1, 'code')))
       return 'continue'
     case 'alcohol':
+      if (!('confirmAlcohol' in client)) {
+        throw new Error('The alcohol command is only available in fetch mode.')
+      }
       console.log(await client.confirmAlcohol())
       return 'continue'
     case 'check': {
+      if (
+        !('checkOrderStarted' in client) ||
+        !('checkLastOrder' in client) ||
+        !('checkMidnight' in client)
+      ) {
+        throw new Error('The check command is only available in fetch mode.')
+      }
       const target = requireArg(args, 1, 'target')
       if (target === 'order') {
         console.log(await client.checkOrderStarted())
@@ -333,8 +398,10 @@ const runCommand = async (client: OfficialClient, args: string[]): Promise<'cont
 
 const runRepl = async (
   name: string,
-  client: OfficialClient,
+  client: AnyOfficialClient,
   getCookies: () => CookieEntry[],
+  mode: ClientMode,
+  qrURLSource: string | undefined,
   createdAt: number,
 ) => {
   const rl = createInterface({ input, output })
@@ -345,7 +412,7 @@ const runRepl = async (
       const line = await rl.question(`saizeriya:${name}> `)
       try {
         const result = await runCommand(client, tokenize(line))
-        await saveSession(name, client, getCookies(), createdAt)
+        await saveSession(name, client, getCookies(), mode, qrURLSource, createdAt)
         if (result === 'exit') {
           break
         }
@@ -355,23 +422,52 @@ const runRepl = async (
     }
   } finally {
     rl.close()
+    if ('close' in client) {
+      await client.close()
+    }
   }
 }
 
 const startSession = async (args: string[]) => {
-  const name = requireArg(args, 0, 'name')
-  const qrURLSource = requireArg(args, 1, 'qrurl')
+  const mode: ClientMode = useBrowserMode(args) ? 'browser' : 'fetch'
+  const strippedArgs = stripCliOptions(args)
+  const name = requireArg(strippedArgs, 0, 'name')
+  const qrURLSource = requireArg(strippedArgs, 1, 'qrurl')
   const peopleCount = parseNumberOption(args, '--people')
+  const headless = hasFlag(args, '--headless')
   const cookieFetch = createCookieFetch()
-  const client = await createClient({
-    qrURLSource,
-    fetchSource: cookieFetch.fetchSource,
-    peopleCount,
-  })
+  const client =
+    mode === 'browser'
+      ? await (
+          await loadBrowserClient()
+        ).createBrowserClient({
+          qrURLSource,
+          peopleCount,
+          launchOptions: headless ? { headless: true } : undefined,
+        })
+      : await createClient({
+          qrURLSource,
+          fetchSource: cookieFetch.fetchSource,
+          peopleCount,
+        })
   const createdAt = Date.now()
-  await saveSession(name, client, cookieFetch.getCookies(), createdAt)
+  await saveSession(
+    name,
+    client,
+    mode === 'browser' ? [] : cookieFetch.getCookies(),
+    mode,
+    qrURLSource,
+    createdAt,
+  )
   printState(client.getState())
-  await runRepl(name, client, cookieFetch.getCookies, createdAt)
+  await runRepl(
+    name,
+    client,
+    mode === 'browser' ? () => [] : cookieFetch.getCookies,
+    mode,
+    qrURLSource,
+    createdAt,
+  )
 }
 
 const useSession = async (args: string[]) => {
@@ -382,20 +478,44 @@ const useSession = async (args: string[]) => {
     throw new Error(`Session not found: ${name}`)
   }
 
+  const mode = snapshot.mode ?? 'fetch'
   const cookieFetch = createCookieFetch(snapshot.cookies)
-  const client = await createClient({
-    initialState: snapshot.state,
-    fetchSource: cookieFetch.fetchSource,
-  })
+  const client =
+    mode === 'browser'
+      ? await (async () => {
+          if (!snapshot.qrURLSource) {
+            throw new Error(
+              'Browser sessions require the original QR URL. Start a new browser session.',
+            )
+          }
+          return await (
+            await loadBrowserClient()
+          ).createBrowserClient({
+            qrURLSource: snapshot.qrURLSource,
+          })
+        })()
+      : await createClient({
+          initialState: snapshot.state,
+          fetchSource: cookieFetch.fetchSource,
+        })
   printState(client.getState())
-  await runRepl(name, client, cookieFetch.getCookies, snapshot.createdAt)
+  await runRepl(
+    name,
+    client,
+    mode === 'browser' ? () => [] : cookieFetch.getCookies,
+    mode,
+    snapshot.qrURLSource,
+    snapshot.createdAt,
+  )
 }
 
 const listSessions = async () => {
   const sessions = await readSessions()
   for (const session of Object.values(sessions)) {
     const updated = new Date(session.updatedAt).toISOString()
-    console.log(`${session.name}\t${updated}\ttable=${session.state.tableNo}`)
+    console.log(
+      `${session.name}\t${updated}\t${session.mode ?? 'fetch'}\ttable=${session.state.tableNo}`,
+    )
   }
 }
 

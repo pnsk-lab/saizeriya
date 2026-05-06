@@ -7,9 +7,11 @@ export const Account = () => (
     <div id="body-section">
       <OrderList />
       <AmountSummary />
-      <button type="submit" name="proc" value="receipt" class="button">
-        お会計を確定
-      </button>
+      <div class="command">
+        <button type="button" id="decide" class="button">
+          Continue
+        </button>
+      </div>
     </div>
   </Shell>
 )

@@ -2,6 +2,7 @@ import { type HTMLElement, parse } from 'node-html-parser'
 import type { AccountSummary } from '../types'
 
 export type PageKind =
+  | 'entry'
   | 'top'
   | 'number'
   | 'menu'
@@ -71,6 +72,7 @@ export class PageParser {
     const kind = pageClass.replace(/-page$/, '')
     if (
       kind === 'top' ||
+      kind === 'entry' ||
       kind === 'number' ||
       kind === 'menu' ||
       kind === 'main' ||

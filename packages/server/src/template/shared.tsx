@@ -27,6 +27,29 @@ const clientScript = (page: TemplatePage) => `
   const form = document.getElementById('frm_ctrl');
   if (!(form instanceof HTMLFormElement)) return;
 
+  const messages = {
+    lastOrderClosed: 'Ordering is closed for this table. Please continue to checkout.',
+    extraCharge: 'A time-based service charge notice applies before continuing.',
+    invalidPeople: 'Enter a party size in the supported range.',
+    confirmPeople: (count) => 'Use party size: ' + count + '?',
+    invalidCode: 'Enter a four digit item code.',
+    missingCode: 'Enter an item code before continuing.',
+    notFound: 'No item matches that code.',
+    lookupFailed: 'Item lookup failed. Please try again.',
+    unavailable: 'This item is currently unavailable.',
+    dataError: 'This item has incompatible option data.',
+    confirmPopup: 'Please confirm this item notice.',
+    restricted: 'Please confirm this restricted item before adding it.',
+    readyToAdd: 'Review the item and quantity, then confirm.',
+    enterCode: 'Enter an item code.',
+    emptyCart: 'Add at least one item before submitting.',
+    confirmSubmit: 'Submit this order?',
+    confirmRemove: 'Remove this row?',
+    visibleCartReset: 'The visible cart was reset after browser navigation.',
+    callSuccess: 'The request was sent.',
+    callFailed: 'The request could not be sent.',
+  };
+
   const setField = (id, value) => {
     const el = document.getElementById(id);
     if (el instanceof HTMLInputElement) el.value = String(value);
@@ -42,6 +65,200 @@ const clientScript = (page: TemplatePage) => `
     Object.entries(values).forEach(([key, value]) => body.set(key, String(value)));
     return fetch(path, { method: 'POST', body });
   };
+
+  const setAndSubmit = (values) => {
+    Object.entries(values).forEach(([key, value]) => setField(key, value));
+    form.requestSubmit();
+  };
+
+  const createModal = (message, buttons) => {
+    if (document.getElementById('base-overlay')) return Promise.resolve('busy');
+    const overlay = document.createElement('div');
+    overlay.id = 'base-overlay';
+    overlay.className = 'ui-widget-overlay ui-front';
+    overlay.setAttribute('role', 'presentation');
+    const dialog = document.createElement('div');
+    dialog.className = 'mock-dialog';
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
+    const text = document.createElement('p');
+    text.textContent = String(message);
+    const actions = document.createElement('div');
+    actions.className = 'ui-dialog-buttonset';
+    dialog.append(text, actions);
+    overlay.append(dialog);
+    document.body.append(overlay);
+    document.body.classList.add('dialog-open');
+    return new Promise((resolve) => {
+      buttons.forEach((button) => {
+        const node = document.createElement('button');
+        node.type = 'button';
+        node.textContent = button.label;
+        node.addEventListener('click', () => {
+          document.body.classList.remove('dialog-open');
+          overlay.remove();
+          resolve(button.value);
+        });
+        actions.append(node);
+      });
+      actions.querySelector('button:last-child')?.focus();
+    });
+  };
+
+  window.alert = (message, okCallback = () => {}) => {
+    createModal(message, [{ label: 'OK', value: 'ok' }]).then(() => okCallback());
+  };
+
+  window.confirm = (message, okCallback = () => {}, cancelCallback = () => {}, reverse = false) => {
+    const buttons = reverse
+      ? [{ label: 'Yes', value: 'yes' }, { label: 'No', value: 'cancel' }]
+      : [{ label: 'No', value: 'cancel' }, { label: 'Yes', value: 'yes' }];
+    createModal(message, buttons).then((value) => {
+      if (value === 'yes') okCallback();
+      else cancelCallback();
+    });
+  };
+
+  window.alcohol = (_title, message, okCallback = () => {}, cancelCallback = () => {}) => {
+    createModal(message, [
+      { label: 'Back', value: 'cancel' },
+      { label: 'Confirm', value: 'yes' },
+    ]).then((value) => {
+      if (value === 'yes') okCallback();
+      else cancelCallback();
+    });
+  };
+
+  const alertAsync = (message) => new Promise((resolve) => window.alert(message, resolve));
+  const confirmAsync = (message, reverse = false) =>
+    new Promise((resolve) => window.confirm(message, () => resolve(true), () => resolve(false), reverse));
+
+  const checkLastOrder = async () => {
+    try {
+      const response = await postForm('./src/cmd/check_lastorder.php', { sid: getField('shop-id') });
+      const data = await response.json();
+      return data.result === 'OK';
+    } catch {
+      return false;
+    }
+  };
+
+  const goOrderEntry = async (proc) => {
+    if (await checkLastOrder()) {
+      await alertAsync(messages.lastOrderClosed);
+      setAndSubmit({ proc: 'account', ctrl: 'clear' });
+      return;
+    }
+    setAndSubmit({ proc });
+  };
+
+  document.getElementById('header')?.querySelector('h1')?.addEventListener('click', (event) => {
+    event.preventDefault();
+    setAndSubmit({ proc: 'top' });
+  });
+
+  document.querySelectorAll('#footer li').forEach((tab) => {
+    tab.addEventListener('click', async (event) => {
+      const target = event.currentTarget;
+      if (!(target instanceof HTMLElement)) return;
+      const procById = {
+        'order-add': 'menu',
+        'order-list': 'main',
+        'order-history': 'history',
+        'after-call': 'call',
+        'do-account': 'account',
+      };
+      const proc = procById[target.id];
+      if (!proc) return;
+      event.preventDefault();
+      if (target.classList.contains('disabled')) return;
+      if (proc === 'menu' || proc === 'main') {
+        await goOrderEntry(proc);
+        return;
+      }
+      setAndSubmit({ proc });
+    });
+  });
+
+  if (${JSON.stringify(page)} === 'top' || ${JSON.stringify(page)} === 'entry') {
+    const startOrder = async (event) => {
+      event.preventDefault();
+      if (await checkLastOrder()) {
+        await alertAsync(messages.lastOrderClosed);
+        setAndSubmit({ proc: 'account', ctrl: 'clear' });
+        return;
+      }
+      try {
+        const response = await postForm('./src/cmd/check_midnight.php', { sid: getField('shop-id') });
+        const data = await response.json();
+        if (data.result === 'OK') await alertAsync(messages.extraCharge);
+      } catch {}
+      setAndSubmit({ proc: 'number' });
+    };
+
+    const changePeople = async (event) => {
+      event.preventDefault();
+      if (await checkLastOrder()) {
+        await alertAsync(messages.lastOrderClosed);
+        setAndSubmit({ proc: 'account', ctrl: 'clear' });
+        return;
+      }
+      setAndSubmit({ proc: 'number', ctrl: 'forced' });
+    };
+
+    postForm('./src/cmd/check_order.php', {
+      sid: getField('shop-id'),
+      tno: getField('table-no'),
+    })
+      .then((response) => response.json())
+      .then((data) => document.body.classList.toggle('start', data.result !== 'OK'))
+      .catch(() => {});
+
+    document.querySelector('#body-section #order')?.addEventListener('click', startOrder);
+    document.querySelector('#body-section #number')?.addEventListener('click', changePeople);
+    document.querySelector('[data-action="change-people"]')?.addEventListener('click', changePeople);
+  }
+
+  if (${JSON.stringify(page)} === 'number') {
+    const confirmPeople = async (count) => {
+      if (!Number.isFinite(count) || count < 1 || count > 99) {
+        await alertAsync(messages.invalidPeople);
+        return;
+      }
+      if (!(await confirmAsync(messages.confirmPeople(count)))) return;
+      setAndSubmit({ number: count, proc: 'menu', ctrl: 'number' });
+    };
+
+    document.querySelectorAll('.btn.num:not(.ent)').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        const id = button.getAttribute('id') || '';
+        const count = Number.parseInt(id.slice(2), 10);
+        if (count < 1 || count > 8) {
+          alertAsync(messages.invalidPeople);
+          return;
+        }
+        confirmPeople(count);
+      });
+    });
+
+    document.querySelector('.btn.num.ent')?.addEventListener('click', (event) => {
+      event.preventDefault();
+      document.querySelector('.number')?.classList.add('enter');
+    });
+
+    document.getElementById('back')?.addEventListener('click', (event) => {
+      event.preventDefault();
+      document.querySelector('.number')?.classList.remove('enter');
+    });
+
+    document.getElementById('decide')?.addEventListener('click', (event) => {
+      event.preventDefault();
+      const input = document.getElementById('nox');
+      const count = input instanceof HTMLInputElement ? Number.parseInt(input.value, 10) : NaN;
+      confirmPeople(count);
+    });
+  }
 
   if (${JSON.stringify(page)} === 'menu') {
     const enter = document.getElementById('enter');
@@ -59,6 +276,9 @@ const clientScript = (page: TemplatePage) => `
     const notice = document.querySelector('.notice-balloon .msg-base span');
     const guide = document.getElementById('guide');
     const guideText = guide ? guide.querySelector('.msg-base span') : null;
+    const base = document.getElementById('body-section');
+    const title = document.querySelector('#header h1');
+    const logo = document.querySelector('.menu .logo');
     let entered = '';
     let resolved = null;
 
@@ -81,12 +301,13 @@ const clientScript = (page: TemplatePage) => `
       if (modAmountInput instanceof HTMLInputElement) modAmountInput.value = '0';
       if (modSection instanceof HTMLElement) modSection.style.display = 'none';
       if (guide instanceof HTMLElement) guide.style.display = 'none';
+      if (logo instanceof HTMLElement) logo.classList.remove('hidden');
     };
 
     const lookupItem = async () => {
       if (entered.length !== 4) {
         resetDetail();
-        setNotice('メニューブックの番号を入力してください。');
+        setNotice(messages.enterCode);
         return;
       }
       try {
@@ -99,9 +320,32 @@ const clientScript = (page: TemplatePage) => `
           ssid: getField('session-id'),
         });
         const data = await response.json();
-        if (data.result !== 'OK' || !data.item_data || data.item_data.state === 0) {
+        if (data.result !== 'OK' || !data.item_data) {
           resetDetail();
-          setNotice('商品が見つかりません。');
+          setNotice(messages.notFound);
+          await alertAsync(messages.notFound);
+          return;
+        }
+
+        if (data.item_data.state === 0) {
+          resetDetail();
+          await alertAsync(messages.unavailable);
+          return;
+        }
+
+        if (data.item_data.state === 1) {
+          resetDetail();
+          return;
+        }
+
+        const detailNoticeCount = [
+          data.item_data.popup ? 1 : 0,
+          data.item_data.notice ? 1 : 0,
+          Number(data.item_data.arc_type || 0) > 0 ? 1 : 0,
+        ].reduce((sum, value) => sum + value, 0);
+        if (detailNoticeCount > 1) {
+          resetDetail();
+          await alertAsync(messages.dataError);
           return;
         }
 
@@ -109,7 +353,8 @@ const clientScript = (page: TemplatePage) => `
         setField('code', entered);
         if (mainName) mainName.textContent = data.item_data.name || '\\u00a0';
         if (mainPrice) mainPrice.textContent = String(data.item_data.price || 0) + '\\u5186';
-        setNotice(data.item_data.notice || '商品を確認して確定してください。');
+        setNotice(data.item_data.notice || messages.readyToAdd);
+        if (logo instanceof HTMLElement) logo.classList.add('hidden');
 
         if (data.item_data.mod_id) {
           setField('mod_code', data.item_data.mod_id);
@@ -130,9 +375,34 @@ const clientScript = (page: TemplatePage) => `
           if (modSection instanceof HTMLElement) modSection.style.display = 'none';
           if (guide instanceof HTMLElement) guide.style.display = 'none';
         }
+
+        if (data.item_data.popup && !(await confirmAsync(messages.confirmPopup))) {
+          entered = '';
+          renderEntered();
+          resetDetail();
+          return;
+        }
+
+        if (data.alcohol_check === 1) {
+          const accepted = await new Promise((resolve) =>
+            window.alcohol('', messages.restricted, () => resolve(true), () => resolve(false)),
+          );
+          if (!accepted) {
+            entered = '';
+            renderEntered();
+            resetDetail();
+            return;
+          }
+          await postForm('./src/cmd/put_alcohol.php', {
+            sid: getField('shop-id'),
+            tno: getField('table-no'),
+            ssid: getField('session-id'),
+          }).catch(() => {});
+        }
       } catch {
         resetDetail();
-        setNotice('商品の取得に失敗しました。');
+        setNotice(messages.lookupFailed);
+        await alertAsync(messages.lookupFailed);
       }
     };
 
@@ -146,7 +416,8 @@ const clientScript = (page: TemplatePage) => `
     const submitAdd = (event) => {
       if (event) event.preventDefault();
       if (!resolved || entered.length !== 4) {
-        setNotice('4桁の商品番号を入力してください。');
+        setNotice(messages.invalidCode);
+        alertAsync(entered.length === 0 ? messages.missingCode : messages.invalidCode);
         return;
       }
       setField('proc', 'main');
@@ -165,6 +436,20 @@ const clientScript = (page: TemplatePage) => `
       form.requestSubmit();
     };
 
+    const showDetail = (event) => {
+      if (event) event.preventDefault();
+      if (entered.length === 0) {
+        alertAsync(messages.missingCode);
+        return;
+      }
+      if (entered.length !== 4 || !resolved) {
+        alertAsync(messages.invalidCode);
+        return;
+      }
+      base?.classList.add('detail');
+      if (title) title.textContent = 'Select quantity';
+    };
+
     renderEntered();
     resetDetail();
     document.querySelectorAll('.tenkey li[data-val]').forEach((key) => {
@@ -178,24 +463,115 @@ const clientScript = (page: TemplatePage) => `
     document.querySelector('.tenkey .del')?.addEventListener('click', async () => {
       entered = entered.slice(0, -1);
       renderEntered();
+      setField('is_reorder', '0');
       await lookupItem();
     });
     if (back) {
       back.addEventListener('click', (event) => {
         event.preventDefault();
-        entered = '';
-        renderEntered();
-        if (amountInput instanceof HTMLInputElement) amountInput.value = '1';
-        resetDetail();
-        setNotice('メニューブックの番号を入力してください。');
+        if (getField('sub_ctrl') === 'add_drink') {
+          setAndSubmit({ proc: 'top' });
+          return;
+        }
+        base?.classList.remove('detail');
+        if (title) title.textContent = 'Enter item code';
       });
     }
-    if (order) order.addEventListener('click', submitAdd);
+    if (order) order.addEventListener('click', showDetail);
     if (decide) decide.addEventListener('click', submitAdd);
     document.querySelector('.detail .main #minus')?.addEventListener('click', () => adjustCount(amountInput, -1, 1));
     document.querySelector('.detail .main #plus')?.addEventListener('click', () => adjustCount(amountInput, 1, 1));
     document.querySelector('.detail .mod #minus')?.addEventListener('click', () => adjustCount(modAmountInput, -1, 0));
     document.querySelector('.detail .mod #plus')?.addEventListener('click', () => adjustCount(modAmountInput, 1, 0));
+  }
+
+  if (${JSON.stringify(page)} === 'main') {
+    const visibleRows = () => Array.from(document.querySelectorAll('#body-section div.list table tbody tr'));
+    const recalc = () => {
+      let count = 0;
+      let total = 0;
+      visibleRows().forEach((row) => {
+        const qtyInput = row.querySelector('input[name="item[count][]"]');
+        const qty = qtyInput instanceof HTMLInputElement
+          ? Number.parseInt(qtyInput.value || '0', 10)
+          : Number.parseInt(row.children[1]?.textContent || '0', 10);
+        const price = Number.parseInt((row.getAttribute('data-unit-price') || '0'), 10);
+        count += Number.isFinite(qty) ? qty : 0;
+        total += price * (Number.isFinite(qty) ? qty : 0);
+      });
+      document.querySelector('.amount p.count span')?.replaceChildren(String(count));
+      document.querySelector('.amount p.amount span')?.replaceChildren(total.toLocaleString());
+      return count;
+    };
+
+    window.addEventListener('pageshow', async () => {
+      const navigation = performance.getEntriesByType('navigation')[0];
+      const legacyBack = window.performance?.navigation?.type === 2;
+      if (legacyBack || navigation?.type === 'back_forward') {
+        document.querySelector('#body-section div.list table tbody')?.replaceChildren();
+        document.querySelectorAll('input[name^="item["]').forEach((input) => input.remove());
+        recalc();
+        await alertAsync(messages.visibleCartReset);
+      }
+    });
+
+    document.querySelector('.command #menu')?.addEventListener('click', async (event) => {
+      event.preventDefault();
+      await goOrderEntry('menu');
+    });
+
+    document.querySelector('.command #order')?.addEventListener('click', async (event) => {
+      event.preventDefault();
+      if (await checkLastOrder()) {
+        await alertAsync(messages.lastOrderClosed);
+        setAndSubmit({ proc: 'account', ctrl: 'clear' });
+        return;
+      }
+      if (recalc() < 1) {
+        await alertAsync(messages.emptyCart);
+        return;
+      }
+      if (await confirmAsync(messages.confirmSubmit)) {
+        setAndSubmit({ proc: 'order' });
+      }
+    });
+
+    document.querySelectorAll('div.list div.name>span, .del').forEach((target) => {
+      target.addEventListener('click', async (event) => {
+        event.preventDefault();
+        if (!(await confirmAsync(messages.confirmRemove))) return;
+        target.closest('tr')?.remove();
+        recalc();
+      });
+    });
+
+    document.querySelectorAll('.minus, .plus').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        const row = button.closest('tr');
+        const input = row?.querySelector('input[name="item[count][]"]');
+        if (!(input instanceof HTMLInputElement)) return;
+        const min = input.classList.contains('zero') ? 0 : 1;
+        const delta = button.classList.contains('plus') ? 1 : -1;
+        const next = Math.max(min, Math.min(99, Number.parseInt(input.value || String(min), 10) + delta));
+        input.value = String(next);
+        recalc();
+      });
+    });
+  }
+
+  if (${JSON.stringify(page)} === 'history') {
+    document.querySelectorAll('.reorder.red[data-id]').forEach((button) => {
+      button.addEventListener('click', async (event) => {
+        event.preventDefault();
+        if (await checkLastOrder()) {
+          await alertAsync(messages.lastOrderClosed);
+          setAndSubmit({ proc: 'account', ctrl: 'clear' });
+          return;
+        }
+        setAndSubmit({ code: button.getAttribute('data-id') || '', proc: 'menu', ctrl: 'reorder' });
+      });
+    });
   }
 
   if (${JSON.stringify(page)} === 'call') {
@@ -206,22 +582,31 @@ const clientScript = (page: TemplatePage) => `
         await postForm('./src/cmd/tbl_call.php', {
           sid: getField('shop-id'),
           tbl: getField('table-no'),
-          aft: after,
+          aft: after ? 'true' : 'false',
         });
-        if (message) {
-          message.textContent = after
-            ? 'デザート呼び出しを受け付けました。'
-            : '店員呼び出しを受け付けました。';
-        }
+        if (message) message.textContent = messages.callSuccess;
+        window.setTimeout(() => setAndSubmit({ proc: 'top' }), 5000);
+        await alertAsync(messages.callSuccess);
+        setAndSubmit({ proc: 'top' });
       } catch {
-        if (message) message.textContent = '呼び出しに失敗しました。';
+        if (message) message.textContent = messages.callFailed;
+        await alertAsync(messages.callFailed);
       }
     };
-    document.getElementById('call-staff')?.addEventListener('click', () => {
+    document.getElementById('call-staff')?.addEventListener('click', (event) => {
+      event.preventDefault();
       triggerCall(false);
     });
-    callAfter?.addEventListener('click', () => {
+    callAfter?.addEventListener('click', (event) => {
+      event.preventDefault();
       if (!callAfter.classList.contains('disabled')) triggerCall(true);
+    });
+  }
+
+  if (${JSON.stringify(page)} === 'account') {
+    document.querySelector('.command #decide, #decide')?.addEventListener('click', (event) => {
+      event.preventDefault();
+      setAndSubmit({ proc: 'receipt' });
     });
   }
 })();
@@ -229,6 +614,7 @@ const clientScript = (page: TemplatePage) => `
 
 const tabClass = (page: TemplatePage, id: string) => {
   const selectedByPage: Partial<Record<TemplatePage, string>> = {
+    entry: 'order-add',
     account: 'do-account',
     call: 'after-call',
     history: 'order-history',
@@ -238,6 +624,7 @@ const tabClass = (page: TemplatePage, id: string) => {
   const disabledByPage: Partial<Record<TemplatePage, string[]>> = {
     account: ['do-account'],
     call: ['after-call'],
+    entry: ['order-list'],
     main: ['order-add', 'do-account'],
     top: ['order-list'],
     menu: ['order-add'],
@@ -251,9 +638,6 @@ const tabClass = (page: TemplatePage, id: string) => {
     .filter(Boolean)
     .join(' ')
 }
-
-const tabDisabled = (page: TemplatePage, id: string) =>
-  tabClass(page, id).split(/\s+/).includes('disabled')
 
 const FooterTab = ({
   id,
@@ -269,7 +653,7 @@ const FooterTab = ({
   const className = tabClass(page, id)
   return (
     <li id={id} class={className}>
-      <button type="submit" name="proc" value={proc} disabled={tabDisabled(page, id)}>
+      <button type="button" name="proc" value={proc} data-proc={proc}>
         <p>{children}</p>
       </button>
     </li>
@@ -363,18 +747,25 @@ export const Shell = ({ page, title, ctrl = '', children }: ShellOptions) => (
         #footer p { margin: 0; }
         #footer li.selected button { background: #238957; color: #fff; }
         #footer li.disabled button { opacity: 0.55; }
+        body.dialog-open { overflow: hidden; }
+        #base-overlay { position: fixed; inset: 0; z-index: 9999998; display: grid; place-items: center; padding: 20px; background: rgba(0, 0, 0, 0.42); }
+        .mock-dialog { width: min(420px, 100%); padding: 18px; border-radius: 6px; background: #fff; box-shadow: 0 18px 60px rgba(0, 0, 0, 0.24); }
+        .mock-dialog p { margin: 0 0 16px; line-height: 1.6; }
+        .ui-dialog-buttonset { display: flex; justify-content: flex-end; gap: 8px; }
+        .ui-dialog-buttonset button { min-width: 84px; }
+        .hidden { display: none !important; }
       `}</style>
     </head>
-    <body>
+    <body class={page === 'entry' ? 'start' : undefined}>
       <div class="off-canvas-wrap">
         <div class="inner-wrap portrait">
           <form
             id="frm_ctrl"
-            class={pageTitle(page)}
+            class={page === 'entry' ? 'entry-page top-page' : pageTitle(page)}
             action={`./?${crypto.randomUUID()}`}
             method="post"
           >
-            <input type="hidden" id="proc" name="proc" value={page} />
+            <input type="hidden" id="proc" name="proc" value={page === 'entry' ? 'top' : page} />
             <input type="hidden" id="ctrl" name="ctrl" value={ctrl} />
             <input type="hidden" id="sub_ctrl" name="sub_ctrl" value="" />
             <input type="hidden" id="cur_lang" name="cur_lang" value="1" />
