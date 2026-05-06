@@ -58,6 +58,35 @@
 	let listEl: HTMLDivElement | null = $state(null);
 	let textareaEl: HTMLTextAreaElement | null = $state(null);
 
+	const getWebGPU = () =>
+		typeof navigator === 'undefined' ? null : ((navigator as Navigator & { gpu?: GPU }).gpu ?? null);
+
+	const installWebGPUAdapterFallback = () => {
+		const gpu = getWebGPU() as (GPU & { __betterzeriyaAdapterFallback?: true }) | null;
+		if (!gpu || gpu.__betterzeriyaAdapterFallback) return;
+
+		const requestAdapter = gpu.requestAdapter.bind(gpu);
+		try {
+			Object.defineProperty(gpu, 'requestAdapter', {
+				configurable: true,
+				value: async (options?: GPURequestAdapterOptions) => {
+					const adapter = await requestAdapter(options);
+					if (adapter || !options?.powerPreference) {
+						return adapter;
+					}
+					return (
+						(await requestAdapter()) ??
+						(await requestAdapter({
+							powerPreference:
+								options.powerPreference === 'high-performance' ? 'low-power' : 'high-performance'
+						}))
+					);
+				}
+			});
+			gpu.__betterzeriyaAdapterFallback = true;
+		} catch {}
+	};
+
 	const isCloseToBottom = () => {
 		if (!listEl) return true;
 		return listEl.scrollHeight - listEl.scrollTop - listEl.clientHeight < 80;
@@ -69,8 +98,17 @@
 	};
 
 	const detectWebGPU = () => {
-		if (typeof navigator === 'undefined') return false;
-		return 'gpu' in navigator;
+		return Boolean(getWebGPU());
+	};
+
+	const verifyWebGPUAdapter = async () => {
+		const gpu = getWebGPU();
+		if (!gpu) return false;
+		const adapter =
+			(await gpu.requestAdapter({ powerPreference: 'high-performance' })) ??
+			(await gpu.requestAdapter()) ??
+			(await gpu.requestAdapter({ powerPreference: 'low-power' }));
+		return Boolean(adapter);
 	};
 
 	const loadEngine = async () => {
@@ -80,6 +118,7 @@
 		loadProgress = 0;
 		loadText = 'モデルを準備しています…';
 		try {
+			installWebGPUAdapterFallback();
 			const { CreateMLCEngine, prebuiltAppConfig } = await import('@mlc-ai/web-llm');
 			const next = await CreateMLCEngine(selectedModel, {
 				initProgressCallback: (report: { progress: number; text: string }) => {
@@ -95,7 +134,10 @@
 			loadText = '準備完了';
 		} catch (caught) {
 			engine = null;
-			error = caught instanceof Error ? caught.message : 'モデル読み込みに失敗しました';
+			const message = caught instanceof Error ? caught.message : 'モデル読み込みに失敗しました';
+			error = message.includes('Unable to find a compatible GPU')
+				? 'WebGPU adapter を取得できませんでした。ブラウザのハードウェアアクセラレーション、GPUドライバ、chrome://gpu の WebGPU 状態を確認してください。'
+				: message;
 		} finally {
 			engineLoading = false;
 		}
@@ -205,7 +247,16 @@
 		webgpuSupported = detectWebGPU();
 		if (!webgpuSupported) {
 			error = 'このブラウザは WebGPU に未対応です。Chrome / Edge デスクトップ版でお試しください。';
+			return;
 		}
+		installWebGPUAdapterFallback();
+		void verifyWebGPUAdapter().then((supported) => {
+			webgpuSupported = supported;
+			if (!supported) {
+				error =
+					'WebGPU adapter を取得できませんでした。ブラウザのハードウェアアクセラレーション、GPUドライバ、chrome://gpu の WebGPU 状態を確認してください。';
+			}
+		});
 	});
 </script>
 
