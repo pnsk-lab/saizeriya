@@ -63,6 +63,17 @@
 		receiptShown: boolean;
 	};
 
+	type LookupItemResult = {
+		result: string;
+		alcohol_check?: number;
+		item_data?: {
+			id: string;
+			name: string;
+			price: number;
+			state: number;
+		};
+	};
+
 	type DefaultMenuEntry = {
 		code: string;
 		name: string;
@@ -121,7 +132,7 @@
 	let checkout = $state<CheckoutPresentation | null>(null);
 	let menu = $state<MenuItem[]>(defaultMenuItems);
 	let menuStatuses = $state<Record<string, MenuStatus>>(
-		Object.fromEntries(defaultMenuItems.map((item) => [item.code, 'available' as MenuStatus]))
+		Object.fromEntries(defaultMenuItems.map((item) => [item.code, 'unchecked' as MenuStatus]))
 	);
 	let menuDetectionSeq = $state<Record<string, number>>({});
 	let currentMenuPeriod = $state(getMenuServicePeriod());
@@ -258,18 +269,66 @@
 		return seq;
 	};
 
-	const detectMenuItem = async (code: string, priority = false) => {
-		const seq = nextMenuDetectionSeq(code);
-		const local = menu.find((entry) => entry.code === code);
-		if (!local) {
-			setMenuStatus(code, 'unavailable', seq);
-			if (priority) {
-				notify(`メニュー番号 ${code} はメニューに登録されていません`);
-			}
+	const lookupOfficialMenuItem = async (code: string) => {
+		const response = await fetch(`/api/sessions/${sessionId}/lookup`, {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({ code, officialSession })
+		});
+		const result = (await response.json()) as LookupItemResult & {
+			error?: string;
+			officialSession?: OfficialSessionSnapshot;
+		};
+		if (!response.ok) {
+			throw new Error(result.error ?? 'Request failed');
+		}
+		if (result.officialSession) {
+			saveOfficialSession(result.officialSession as OfficialSessionSnapshot);
+		}
+		if (result.result !== 'OK' || !result.item_data || result.item_data.state === 0) {
 			throw new Error(`メニュー番号 ${code} は利用できません`);
 		}
-		setMenuStatus(code, 'available', seq);
-		return local;
+
+		return {
+			code,
+			name: result.item_data.name,
+			kana: result.item_data.name,
+			price: result.item_data.price,
+			category: menu.find((item) => item.code === code)?.category ?? '入力済み',
+			tags: [...new Set([...(menu.find((item) => item.code === code)?.tags ?? []), '公式確認済み'])],
+			imageUrl: menu.find((item) => item.code === code)?.imageUrl ?? null,
+			alcoholCheck: result.alcohol_check,
+			source: 'official'
+		} satisfies MenuItem;
+	};
+
+	const upsertMenuItem = (item: MenuItem) => {
+		const existing = menu.find((entry) => entry.code === item.code);
+		menu = existing
+			? menu.map((entry) => (entry.code === item.code ? { ...entry, ...item } : entry))
+			: [...menu, item];
+	};
+
+	const detectMenuItem = async (code: string, priority = false) => {
+		const seq = nextMenuDetectionSeq(code);
+		menuStatuses = { ...menuStatuses, [code]: 'loading' };
+		try {
+			const item = await lookupOfficialMenuItem(code);
+			upsertMenuItem(item);
+			setMenuStatus(code, 'available', seq);
+			return item;
+		} catch (caught) {
+			const message = caught instanceof Error ? caught.message : '通信に失敗しました';
+			setMenuStatus(code, message.includes('利用できません') ? 'unavailable' : 'error', seq);
+			if (priority) {
+				if (message.includes('利用できません')) {
+					notify(message);
+				} else {
+					error = message;
+				}
+			}
+			throw caught;
+		}
 	};
 
 	const saveCart = () => {
