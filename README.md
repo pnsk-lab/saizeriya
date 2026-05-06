@@ -143,6 +143,26 @@ Connect this repository on the Cloudflare Pages dashboard and use the following 
 
 `BUN_VERSION` makes the Cloudflare build environment install bun. `bun install` must be run explicitly in the build command — Cloudflare does not auto-install dependencies for bun projects, and npm cannot resolve the `workspace:*` protocol used by this monorepo.
 
+### Deploy to Vercel
+
+Use the repository root as the Vercel project root. The included `vercel.json`
+installs dependencies with Bun and builds Betterzeriya with the Vercel adapter.
+
+```bash
+bun i
+bun run betterzeriya:build:vercel
+```
+
+For CLI deployment:
+
+```bash
+bunx vercel
+bunx vercel --prod
+```
+
+For Git deployment, import the repository in Vercel and keep the project root at
+the repository root. The build command is provided by `vercel.json`.
+
 ## Star History
 
 <a href="https://www.star-history.com/?repos=pnsk-lab%2Fsaizeriya&type=date&legend=top-left">

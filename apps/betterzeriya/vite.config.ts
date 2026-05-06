@@ -12,9 +12,7 @@ export default defineConfig(({ mode }) => ({
     mode === 'production'
       ? {
           alias: {
-            '$server-mock/menu.json': resolve(
-              './src/lib/server-mock-stub.json'
-            ),
+            '$server-mock/menu.json': resolve('./src/lib/server-mock-stub.json'),
           },
         }
       : {},

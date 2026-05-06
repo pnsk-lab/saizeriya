@@ -81,35 +81,16 @@ export const getDisplayCategory = (
   period: MenuServicePeriod,
 ) => (period === 'lunch' && isCurrentLunchMenuItem(item) ? 'ランチ' : item.category)
 
-const normalizeMenuKey = (value: string) =>
-  value
-    .normalize('NFKC')
-    .replace(/^ランチ[)）]/, '')
-    .replace(/[()（）].*?[)）]/g, '')
-    .replace(/\s+/g, '')
-    .toLowerCase()
-
-export const createMenuDisplayKey = (item: Pick<MenuAvailabilityItem, 'name'>) =>
-  normalizeMenuKey(item.name)
-
 export const filterMenuForServicePeriod = <T extends MenuAvailabilityItem>(
   items: T[],
   period: MenuServicePeriod,
 ) => {
   const visibleBaseItems = items.filter((item) => !isStaleLunchMenuItem(item))
-  const lunchKeys = new Set(
-    visibleBaseItems
-      .filter((item) => isCurrentLunchMenuItem(item))
-      .map((item) => createMenuDisplayKey(item)),
-  )
 
   return visibleBaseItems
     .filter((item) => {
       if (period === 'regular') {
         return !isLunchOnlyMenuItem(item)
-      }
-      if (!isCurrentLunchMenuItem(item) && lunchKeys.has(createMenuDisplayKey(item))) {
-        return false
       }
       return true
     })

@@ -27,8 +27,12 @@ describe('menu classification', () => {
 
   it('does not classify food, soft drinks, or non-alcohol drinks as alcohol', () => {
     expect(isAlcoholMenuItem(item({}))).toBe(false)
-    expect(isAlcoholMenuItem(item({ name: 'セットドリンクバー', category: 'ドリンク' }))).toBe(false)
-    expect(isAlcoholMenuItem(item({ name: 'ノンアルコールビール', category: 'ドリンク' }))).toBe(false)
+    expect(isAlcoholMenuItem(item({ name: 'セットドリンクバー', category: 'ドリンク' }))).toBe(
+      false,
+    )
+    expect(isAlcoholMenuItem(item({ name: 'ノンアルコールビール', category: 'ドリンク' }))).toBe(
+      false,
+    )
   })
 
   it('uses alcoholCheck field', () => {

@@ -12,6 +12,7 @@
     "betterzeriya:build": "bun run --cwd packages/client build && bun run --cwd apps/betterzeriya build",
     "betterzeriya:build:pages": "bun run --cwd packages/client build && bun run --cwd apps/betterzeriya build:pages",
     "betterzeriya:deploy:pages": "bun run betterzeriya:build:pages && bun run --cwd apps/betterzeriya deploy:pages",
+    "betterzeriya:build:vercel": "bun run --cwd packages/client build && cd apps/betterzeriya && VERCEL=1 bun run build && mkdir -p ../../.vercel && rm -rf ../../.vercel/output && cp -R .vercel/output ../../.vercel/output",
     "betterzeriya:start": "node apps/betterzeriya/build",
     "build": "bun run betterzeriya:build",
     "start": "HOST=localhost node apps/betterzeriya/build",

@@ -22,7 +22,7 @@ describe('menu availability', () => {
     expect(getMenuServicePeriod(new Date('2026-05-03T12:00:00+09:00'))).toBe('regular')
   })
 
-  it('shows lunch item instead of its regular item during lunch', () => {
+  it('shows both lunch and regular items during lunch', () => {
     const menu = [
       item('1135', 'ﾗﾝﾁ)ﾀﾗｺｿｰｽｼｼﾘｰ風', 'ランチ', 500),
       item('2301', 'ﾀﾗｺｿｰｽｼｼﾘｰ風', 'パスタ', 400),
@@ -31,6 +31,7 @@ describe('menu availability', () => {
 
     expect(filterMenuForServicePeriod(menu, 'lunch').map((entry) => entry.code)).toEqual([
       '1135',
+      '2301',
       '1202',
     ])
   })

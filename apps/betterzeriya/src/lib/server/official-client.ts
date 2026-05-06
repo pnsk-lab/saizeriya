@@ -9,22 +9,6 @@ type OfficialClient = Awaited<ReturnType<typeof createClient>>
 type FetchSource = (request: Request) => Promise<Response> | Response
 type CookieEntry = [string, string]
 
-export interface MenuSeedItem {
-  code: string
-  name: string
-  kana: string
-  price: number
-  category: string
-  tags: string[]
-  imageUrl: string | null
-  alcoholCheck?: number
-}
-
-export interface HydratedMenuItem extends MenuSeedItem {
-  source: 'official'
-  available: boolean
-}
-
 export interface CheckoutPresentation {
   state: ReturnType<typeof serializeState>
   account: AccountSummary
@@ -206,45 +190,6 @@ export const lookupOfficialItem = async (
   const session = await createClientFromSnapshot(id, snapshot)
   const result = await session.client.lookupItem(code)
   return { result, officialSession: session.getSnapshot() }
-}
-
-export const hydrateOfficialMenu = async (
-  id: string,
-  seedItems: MenuSeedItem[],
-): Promise<{ items: HydratedMenuItem[]; failedCodes: string[] }> => {
-  const session = getOfficialSession(id)
-  const failedCodes: string[] = []
-  const uniqueItems = [...new Map(seedItems.map((item) => [item.code, item])).values()]
-
-  const results = await Promise.all(
-    uniqueItems.map(async (seed) => {
-      try {
-        const result = await session.client.lookupItem(seed.code)
-        if (result.result !== 'OK' || !result.item_data || result.item_data.state === 0) {
-          failedCodes.push(seed.code)
-          return null
-        }
-
-        return {
-          ...seed,
-          name: result.item_data.name || seed.name,
-          price: result.item_data.price || seed.price,
-          tags: [...new Set([...seed.tags, '公式同期'])],
-          ...(result.alcohol_check !== undefined && { alcoholCheck: result.alcohol_check }),
-          source: 'official' as const,
-          available: true,
-        } as HydratedMenuItem
-      } catch {
-        failedCodes.push(seed.code)
-        return null
-      }
-    }),
-  )
-
-  return {
-    items: results.filter((item) => item !== null) as HydratedMenuItem[],
-    failedCodes,
-  }
 }
 
 export const submitOfficialCart = async (
