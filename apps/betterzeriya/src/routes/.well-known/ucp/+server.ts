@@ -1,21 +1,42 @@
 import { json, type RequestHandler } from '@sveltejs/kit'
+import {
+  UCP_CHECKOUT_CAPABILITY,
+  UCP_GOOGLE_PAY_HANDLER,
+  UCP_SHOPPING_SERVICE,
+  UCP_VERSION,
+} from '$lib/server/ucp'
 
 export const GET: RequestHandler = async ({ url }) => {
   const origin = url.origin
   return json({
     name: 'betterzeriya',
-    version: '2026-01-11',
-    capabilities: [
-      {
-        name: 'dev.ucp.shopping.checkout',
-        bindings: [
+    url: origin,
+    ucp: {
+      version: UCP_VERSION,
+      services: {
+        [UCP_SHOPPING_SERVICE]: [
           {
-            type: 'rest',
-            spec: 'https://ucp.dev/specification/checkout-rest/',
-            base_url: `${origin}/api/ucp`,
+            version: UCP_VERSION,
+            bindings: [
+              {
+                type: 'rest',
+                endpoint: `${origin}/api/ucp`,
+              },
+            ],
           },
         ],
       },
-    ],
+      capabilities: {
+        [UCP_CHECKOUT_CAPABILITY]: [{ version: UCP_VERSION }],
+      },
+      payment_handlers: {
+        [UCP_GOOGLE_PAY_HANDLER]: [
+          {
+            id: 'betterzeriya_google_pay',
+            version: UCP_VERSION,
+          },
+        ],
+      },
+    },
   })
 }
