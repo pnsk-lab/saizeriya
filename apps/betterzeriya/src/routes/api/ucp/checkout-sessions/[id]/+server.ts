@@ -6,7 +6,6 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
 const normalizeBuyer = (value: unknown) => (isRecord(value) ? value : undefined)
-const normalizePayment = (value: unknown) => (isRecord(value) ? value : undefined)
 const normalizeCurrency = (value: unknown) =>
   typeof value === 'string' && /^[A-Z]{3}$/.test(value) ? value : undefined
 
@@ -48,7 +47,6 @@ export const PUT: RequestHandler = async ({ params, request }) => {
     line_items: normalizedLineItems?.lineItems,
     buyer: normalizeBuyer(body.buyer),
     currency: normalizeCurrency(body.currency),
-    payment: normalizePayment(body.payment),
   })
 
   if (!session) {

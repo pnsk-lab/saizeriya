@@ -1,5 +1,6 @@
 import { json, type RequestHandler } from '@sveltejs/kit'
-import { createUcpCheckoutSession, type UcpLineItemInput } from '$lib/server/ucp'
+import { createUcpCheckoutSessionWithOfficialSession, type UcpLineItemInput } from '$lib/server/ucp'
+import { parseOfficialSessionSnapshot } from '$lib/server/official-client'
 
 const MAX_LINE_ITEMS = 100
 const MAX_ITEM_ID_LENGTH = 256
@@ -9,9 +10,14 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
 const normalizeBuyer = (value: unknown) => (isRecord(value) ? value : undefined)
-const normalizePayment = (value: unknown) => (isRecord(value) ? value : undefined)
 const normalizeCurrency = (value: unknown) =>
   typeof value === 'string' && /^[A-Z]{3}$/.test(value) ? value : undefined
+const normalizePeopleCount = (value: unknown) => {
+  const peopleCount = Number(value)
+  return Number.isInteger(peopleCount) && peopleCount >= 1 && peopleCount <= 99
+    ? peopleCount
+    : undefined
+}
 
 export const _normalizeLineItems = (
   value: unknown,
@@ -32,9 +38,9 @@ export const _normalizeLineItems = (
     }
 
     const id = typeof lineItem.item.id === 'string' ? lineItem.item.id.trim() : ''
-    if (id.length === 0 || id.length > MAX_ITEM_ID_LENGTH) {
+    if (!/^\d{4}$/.test(id) || id.length > MAX_ITEM_ID_LENGTH) {
       return {
-        error: `Each line_items item must include a non-empty id up to ${MAX_ITEM_ID_LENGTH} characters`,
+        error: 'Each line_items item id must be a 4 digit Saizeriya item code',
       }
     }
 
@@ -80,13 +86,46 @@ export const POST: RequestHandler = async ({ request, url }) => {
     return json({ code: 'invalid_request', content: normalizedLineItems.error }, { status: 400 })
   }
 
-  const session = createUcpCheckoutSession({
-    origin: url.origin,
-    line_items: normalizedLineItems.lineItems,
-    buyer: normalizeBuyer(body.buyer),
-    currency: normalizeCurrency(body.currency),
-    payment: normalizePayment(body.payment),
-  })
+  const qrURLSource = String(body.qrURLSource ?? body.qr_url_source ?? '').trim()
+  const officialSession = parseOfficialSessionSnapshot(
+    body.officialSession ?? body.official_session,
+  )
+
+  if (!qrURLSource && !officialSession) {
+    return json(
+      {
+        code: 'invalid_request',
+        content: 'qrURLSource or officialSession is required to create an orderable checkout',
+      },
+      { status: 400 },
+    )
+  }
+
+  if (qrURLSource && !URL.canParse(qrURLSource)) {
+    return json({ code: 'invalid_request', content: 'QR URL is invalid' }, { status: 400 })
+  }
+
+  let session
+
+  try {
+    session = await createUcpCheckoutSessionWithOfficialSession({
+      origin: url.origin,
+      line_items: normalizedLineItems.lineItems,
+      buyer: normalizeBuyer(body.buyer),
+      currency: normalizeCurrency(body.currency),
+      qrURLSource,
+      peopleCount: normalizePeopleCount(body.peopleCount ?? body.people_count),
+      officialSession,
+    })
+  } catch (error) {
+    return json(
+      {
+        code: 'official_session_failed',
+        content: error instanceof Error ? error.message : 'Failed to initialize official session',
+      },
+      { status: 502 },
+    )
+  }
 
   return json(session, { status: 201 })
 }

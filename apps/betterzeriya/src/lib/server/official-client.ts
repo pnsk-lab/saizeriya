@@ -256,6 +256,7 @@ export const submitOfficialCart = async (
   snapshot?: OfficialSessionSnapshot,
 ) => {
   const session = await createClientFromSnapshot(id, snapshot)
+  await session.client.goToMenu()
   while (session.client.getState().cart.length > 0) {
     await session.client.removeCartItem(0)
   }

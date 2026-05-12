@@ -18,6 +18,8 @@ export const processQR = async (qrURL: string, fetch: typeof globalThis.fetch) =
     shopId: parser.getShopId(),
     tableNo: parser.getTableNo(),
     peopleCount: parser.getPeopleCount(),
+    token: parser.getToken(),
+    sessionId: parser.getSessionId(),
     pageKind: parser.getPageKind(),
   }
 }

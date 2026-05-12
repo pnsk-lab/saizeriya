@@ -1,10 +1,5 @@
 import { json, type RequestHandler } from '@sveltejs/kit'
-import {
-  UCP_CHECKOUT_CAPABILITY,
-  UCP_GOOGLE_PAY_HANDLER,
-  UCP_SHOPPING_SERVICE,
-  UCP_VERSION,
-} from '$lib/server/ucp'
+import { UCP_CHECKOUT_CAPABILITY, UCP_SHOPPING_SERVICE, UCP_VERSION } from '$lib/server/ucp'
 
 export const GET: RequestHandler = async ({ url }) => {
   const origin = url.origin
@@ -28,14 +23,6 @@ export const GET: RequestHandler = async ({ url }) => {
       },
       capabilities: {
         [UCP_CHECKOUT_CAPABILITY]: [{ version: UCP_VERSION }],
-      },
-      payment_handlers: {
-        [UCP_GOOGLE_PAY_HANDLER]: [
-          {
-            id: 'betterzeriya_google_pay',
-            version: UCP_VERSION,
-          },
-        ],
       },
     },
   })

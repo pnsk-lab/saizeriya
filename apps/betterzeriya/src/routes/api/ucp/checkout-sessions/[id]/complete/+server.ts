@@ -1,9 +1,6 @@
 import { json, type RequestHandler } from '@sveltejs/kit'
 import { completeUcpCheckoutSession } from '$lib/server/ucp'
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value)
-
 export const POST: RequestHandler = async ({ params, request }) => {
   if (!params.id) {
     return json(
@@ -12,9 +9,20 @@ export const POST: RequestHandler = async ({ params, request }) => {
     )
   }
 
-  const body = await request.json().catch(() => ({}))
-  const payment = isRecord(body) && isRecord(body.payment) ? body.payment : undefined
-  const session = completeUcpCheckoutSession(params.id, payment)
+  await request.json().catch(() => ({}))
+  let session
+
+  try {
+    session = await completeUcpCheckoutSession(params.id)
+  } catch (error) {
+    return json(
+      {
+        code: 'submit_failed',
+        content: error instanceof Error ? error.message : 'Failed to submit order',
+      },
+      { status: 502 },
+    )
+  }
 
   if (!session) {
     return json(
