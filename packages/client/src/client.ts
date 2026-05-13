@@ -53,6 +53,8 @@ export const createClient = async ({
         shopId: processedQR!.shopId,
         tableNo: processedQR!.tableNo,
         peopleCount: peopleCount ?? processedQR!.peopleCount ?? 0,
+        token: processedQR!.token,
+        sessionId: processedQR!.sessionId,
         pageKind: processedQR!.pageKind,
         cart: [],
       }

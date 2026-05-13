@@ -2,18 +2,15 @@ import menuData from '$lib/assets/data/menu.json'
 import { normalizeMenuName } from './menu-name-normalization'
 
 type MenuItem = {
-  item_data: {
-    id: string
-    name: string
-    price: number
-  }
-  alcohol_check?: number
+  code: string
+  name: string
+  price: number
 }
 
 export const buildMenuList = () =>
   (menuData as MenuItem[])
-    .filter((item) => item.item_data.price > 0)
-    .map((item) => `- ${normalizeMenuName(item.item_data.name)} (${item.item_data.price}円)`)
+    .filter((item) => item.price > 0)
+    .map((item) => `- ${normalizeMenuName(item.name)} (${item.price}円)`)
     .join('\n')
 
 export const buildSystemPrompt =

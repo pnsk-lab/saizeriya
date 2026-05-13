@@ -127,7 +127,7 @@
 				},
 				appConfig: {
 					...prebuiltAppConfig,
-					useIndexedDBCache: true
+					cacheBackend: 'indexeddb'
 				}
 			});
 			engine = next;
