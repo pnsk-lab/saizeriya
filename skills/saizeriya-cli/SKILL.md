@@ -11,12 +11,13 @@ Act as the user's careful CLI operator. Convert the user's dining/session goal i
 
 This skill is not for developing the package. Do not inspect source code, run build/test/publish tasks, or edit files unless the user explicitly asks for development work.
 
-Treat real service actions as sensitive:
+Treat real service actions by risk category:
 
-- Ask for explicit confirmation before `submit`, `call staff`, or `call dessert`.
+- Read-only commands may be used to clarify state.
+- Reversible write commands may be used when they directly follow the user's stated goal; for ambiguous requests, state what will change first.
+- Destructive, checkout-related, staff-call, and irreversible setup commands require explicit human approval immediately before execution. This includes `people`, `submit`, `account`, `receipt`, `call staff`, and `call dessert`.
 - Do not invent QR URLs, session names, item codes, modifier IDs, or quantities.
-- If an action may affect a real restaurant order, state what will happen before running it.
-- Prefer read-only commands when clarifying state.
+- If an action may affect a real restaurant order, bill, staff call, checkout flow, or one-time session setup, state what will happen before running it.
 
 ## Command entry
 
@@ -75,8 +76,6 @@ Inside an interactive session, send one command at a time. Useful read-only comm
 ```text
 state
 cart
-account
-receipt
 lookup <code>
 check order
 check last
@@ -85,23 +84,34 @@ help
 exit
 ```
 
-Cart-changing commands:
+Reversible write commands. These change the session or unsubmitted cart, but do not send an order to the kitchen or enter checkout by themselves. Use them only within the user's stated ordering goal:
+
+```text
+add <code> [count] [--mod-id <id>] [--mod-count <count>] [--reorder]
+remove <index>
+menu
+cart-page
+history
+reorder <code>
+```
+
+`add` and `remove` are a reversible pair for the unsubmitted cart: items added with `add` can be removed before `submit`, and removed items can be added again. This reversibility ends once `submit` sends the cart as an order.
+
+Destructive, checkout-related, staff-call, restricted-item confirmation, and one-time session setup commands require explicit human approval immediately before execution:
 
 ```text
 people <count>
-add <code> [count] [--mod-id <id>] [--mod-count <count>] [--reorder]
-remove <index>
-reorder <code>
+submit
+account
+receipt
+call staff
+call dessert
 alcohol
 ```
 
-Confirmation-required commands:
+`people` is not merely an idempotent preference update. In a live restaurant session, the first party-size selection may lock or finalize the session's party size, so treat it as approval-required setup.
 
-```text
-submit
-call staff
-call dessert
-```
+`receipt` is not read-only. It submits the receipt/checkout flow and has been observed in a live Saizeriya session to trigger 「お会計を確定しました」 and display cashier-barcode instructions. `account` enters the checkout/accounting flow and should also be treated as sensitive.
 
 ## Interaction rules
 
